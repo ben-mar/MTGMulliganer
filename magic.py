@@ -157,7 +157,6 @@ class Train:
 
     def __init__(self,DeckName,DeckDict,NonLandDict={},LandDict={}):
 
-
         CurrentDeck = Deck(DeckName,DeckDict)
         CurrentDeckNonLand = Deck(DeckName,NonLandDict)
         CurrentDeckLand = Deck(DeckName,LandDict)
@@ -296,12 +295,9 @@ class Train:
                 TrainingFile.write(line_to_write+'\n')
         print('Done !')
 
-    def TransformTrainingSet(self,TrainingFileName,copy=True):
+    def TransformTrainingSet(self,TrainingFileName):
         docs,labels = Train.TrainingSetToDocs(self,TrainingFileName)
-        if copy :
-            Train.WriteTraininsSetFeatureFromDocs(self,docs,labels,'TrainingSet_copy')
-        else :
-            Train.WriteTraininsSetFeatureFromDocs(self,docs,labels,'TrainingSet')
+        Train.WriteTraininsSetFeatureFromDocs(self,docs,labels,'TrainingSet')
 
     def TrainAndSaveWeights(self,save=True):
         data = np.copy(pd.read_csv('Training_set_'+self.DeckName+'/TrainingSet.csv',sep=';',header=None))
