@@ -5,10 +5,11 @@ from PIL import Image
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.externals import joblib
 
-### group 1 :  deck dict, 
+
+
 class Deck:
 
-    def __init__(self,DeckDict,DeckName):
+    def __init__(self,DeckName,DeckDict = {}):
         self.DeckDict = DeckDict
         self.DeckName = DeckName
         self.Features = np.copy(pd.read_csv('Training_set_'+self.DeckName+'/Features.csv',sep=';'))[:,1:]
@@ -17,14 +18,14 @@ class Deck:
 
     def decklist(self):
         deck_list =[]
-        cards = self.DeckDict.items()
-        for card_itself,number_of_the_card in cards:
-            for _ in range(number_of_the_card):
-                deck_list.append(str(card_itself))
+        Cards = self.DeckDict.items()
+        for Card,NumberOfCopy in Cards:
+            for _ in range(NumberOfCopy):
+                deck_list.append(str(Card))
         return deck_list
 
     def cardlist(self):
-        card_list = list(self.DeckDict.keys())
+        card_list = list(np.copy(pd.read_csv('Training_set_'+self.DeckName+'/Features.csv',sep=';'))[:,0])
         return card_list
 
     def GetDeckName(self):
@@ -39,39 +40,36 @@ class Deck:
     def GetFeatures(self):
         return self.Features
 
-
 class ML:
 
     def __init__(self,DeckName):
         self.DeckName = DeckName
-        self.ModelML = ML.LoadModel(self)
     
     def LoadModel(self):
-        return joblib.load('Training_set_'+self.DeckName+'/'+self.DeckName+'SavedWeights.pkl')
-
-
-### group 2 : create hand & turn it into testable hand """class hand ?"""
+        self.ModelML = joblib.load('Training_set_'+self.DeckName+'/'+self.DeckName+'SavedWeights.pkl')
 
 class Main:
 
-    def __init__(self,DeckDict,DeckName):
-        CurrentDeck = Deck(DeckDict,DeckName)
-        self.DeckList = CurrentDeck.GetDeckList()
-        self.CardList = CurrentDeck.GetCardList()
-        self.Features = CurrentDeck.GetFeatures()
-        self.DeckName = CurrentDeck.GetDeckName()
-        self.ModelML = ML(DeckName).ModelML
+    def __init__(self,DeckName,DeckDict={}):
+        CurrentDeck = Deck(DeckName,DeckDict)
+        CurrentDeckMLModel = ML(DeckName)
+        CurrentDeckMLModel.LoadModel()
+        self.DeckList = CurrentDeck.DeckList
+        self.CardList = CurrentDeck.CardList
+        self.Features = CurrentDeck.Features
+        self.DeckName = CurrentDeck.DeckName
+        self.ModelML = CurrentDeckMLModel.ModelML
 
 
-    def CardsToIndex(self):
+    def CardsToIndex(self,DeckList):
         card_index = []
-        deck_list_set = list(set(self.DeckList))
-        for card in self.DeckList:
+        deck_list_set = list(set(DeckList))
+        for card in DeckList:
             card_index.append(deck_list_set.index(card))
         return card_index,deck_list_set
 
-    def CreateHand(self,n):
-        deck_numbers_index,deck_list_map = Main.CardsToIndex(self.DeckList) 
+    def CreateHand(self,DeckList,n):
+        deck_numbers_index,deck_list_map = Main.CardsToIndex(self,DeckList) 
         deck_numbers_shuffled = [i for i in deck_numbers_index]
         np.random.shuffle(deck_numbers_shuffled)
         hand_numbers = deck_numbers_shuffled[0:n]
@@ -122,14 +120,14 @@ class Main:
 
     def TestHand(self,testable_hand): 
         testable_hand_RFC = Main.TestableHandForRFC(self,testable_hand)
-        if self.ModelML.predict(testable_hand_RFC)[0] ==1:
+        prediction = self.ModelML.predict(testable_hand_RFC)[0]
+        if prediction == 1:
             print('-------------------------------------------------------KEEP-------------------------------------------------------','\n')
-            print('\n')
             print('\n')
         else :
             print('-------------------------------------------------------MULL-------------------------------------------------------','\n')
             print('\n')
-            print('\n')
+        return prediction
 
     def RunHand(self,hand):
         sorted_hand = Main.SortHand(self,hand[0].split())
@@ -137,31 +135,39 @@ class Main:
         Main.ShowHand(self,testable_hand)
         Main.TestHand(self,testable_hand)
 
-    def Test_model(self,deck_dict,n_test):
+    def TestModel(self,deck_dict,n_test):
         for _ in range(n_test):  
-            created_hand = Main.CreateHand(self,7)
+            created_hand = Main.CreateHand(self,self.DeckList,7)
             testable_hand = Main.CreatedHandToTestableHand(self,created_hand)
             Main.RunHand(self,testable_hand)
 
-class Training:
+class Train:
 
-    def __init__(self,DeckDict,DeckName,FeaturesRaw):
-        CurrentDeck = Deck(DeckDict,DeckName)
-        self.DeckList = CurrentDeck.GetDeckList()
-        self.CardList = CurrentDeck.GetCardList()
-        self.Features = CurrentDeck.GetFeatures()
+    def __init__(self,DeckName,DeckDict,NonLandDict={},LandDict={}):
 
-    def training_set(self,n,TrainingSetSize,TrainingFileName):
+
+        CurrentDeck = Deck(DeckName,DeckDict)
+        CurrentDeckNonLand = Deck(DeckName,NonLandDict)
+        CurrentDeckLand = Deck(DeckName,LandDict)
+
+        self.DeckName = CurrentDeck.DeckName
+        self.DeckList = CurrentDeck.DeckList
+        self.CardList = CurrentDeck.CardList
+        self.Features = CurrentDeck.Features
+        self.NonLandList = CurrentDeckNonLand.DeckList
+        self.LandList = CurrentDeckLand.DeckList
+
+    def MakeTrainingSet(self,n,TrainingSetSize,TrainingFileName):
         pv =';'
-        with open(TrainingFileName+'.csv' , 'w') as TrainingFile,\
-        open(TrainingFileName+'question.csv' , 'w') as QuestionFile:
-            for _ in range(TrainingSetSize):
-                current_hand = Main.CreateHand(self,n)
+        with open('Training_set_'+self.DeckName+'/'+TrainingFileName+'.csv' , 'w') as TrainingFile,\
+        open('Training_set_'+self.DeckName+'/'+TrainingFileName+'question.csv' , 'w') as QuestionFile:
+            for i in range(TrainingSetSize):
+                current_hand = Main.CreateHand(self,self.DeckList,n)
                 sorted_hand = Main.SortHand(self,current_hand)
                 testable_sorted_hand = Main.CreatedHandToTestableHand(self,sorted_hand)         
                 Main.ShowHand(self,testable_sorted_hand)           
                 y = input("Keep: 1, Mull: 0 or Not sure: 3 ?")
-                print('\n')
+                print(str(i+1)+'/'+str(TrainingSetSize))   
                 line_written=''
                 for card in sorted_hand:
                     line_written += card+pv
@@ -175,8 +181,88 @@ class Training:
                     break 
         print('Written !')
 
-    def training_set_to_docs_and_labels(self,TrainingFileName):
-        training_set = pd.read_csv(TrainingFileName+'.csv',sep =';',header=None)
+    def MakeTrainingSetWithModel(self,n,TrainingSetSize,TrainingFileName):
+        CurrentDeckMLModel = ML(self.DeckName)
+        CurrentDeckMLModel.LoadModel()
+        self.ModelML = CurrentDeckMLModel.ModelML
+        pv =';'
+        with open('Training_set_'+self.DeckName+'/'+TrainingFileName+'_Model.csv' , 'w') as TrainingFile,\
+        open('Training_set_'+self.DeckName+'/'+TrainingFileName+'_ModelQuestion.csv' , 'w') as QuestionFile:
+            for i in range(TrainingSetSize):
+                current_hand = Main.CreateHand(self,self.DeckList,n)
+                sorted_hand = Main.SortHand(self,current_hand)
+                testable_hand = Main.CreatedHandToTestableHand(self,sorted_hand)
+                Main.ShowHand(self,testable_hand) 
+                prediction = Main.TestHand(self,testable_hand)
+                print(str(i+1)+'/'+str(TrainingSetSize))         
+                y = int(input("Correct: 1, Not_correct: 0 or Not sure: 3 ?"))
+                line_written=''
+                for card in sorted_hand:
+                    line_written += card+pv
+                if y==1:
+                    prediction=str(prediction)
+                    line_written += prediction + '\n'
+                    TrainingFile.write(line_written)
+                if y==0:
+                    prediction=str(1-prediction)
+                    line_written += prediction + '\n'
+                    TrainingFile.write(line_written)
+                if y==3:
+                    y=str(y)
+                    line_written += y + '\n'
+                    QuestionFile.write(line_written)
+                if y==9:
+                    break 
+        print('Written !')
+
+
+    def MakeControlledTrainingSetWithModel(self,n,n_lands,TrainingSetSize,TrainingFileName):
+        if len(self.NonLandList) == 0:
+            print('Error, NonLandList is empty, perhaps NonLandDict has been forgotten ?')
+            return 
+        if len(self.LandList) == 0:
+            print('Error, LandList is empty, perhaps LandDict has been forgotten ?')
+            return 
+        CurrentDeckMLModel = ML(self.DeckName)
+        CurrentDeckMLModel.LoadModel()
+        self.ModelML = CurrentDeckMLModel.ModelML
+        pv =';'
+        with open('Training_set_'+self.DeckName+'/'+TrainingFileName+'.csv' , 'a+') as TrainingFile,\
+        open('Training_set_'+self.DeckName+'/'+TrainingFileName+'Question.csv' , 'a+') as QuestionFile:
+            #deck_list = decklist(deck_dict)
+            for i in range(TrainingSetSize):
+                #current_hand = create_hand(deck_list,n)
+                current_hand_lands = Main.CreateHand(self,self.LandList,n_lands)
+                current_hand_non_land = Main.CreateHand(self,self.NonLandList,n-n_lands)
+                current_hand = current_hand_lands+current_hand_non_land
+                
+                sorted_hand = Main.SortHand(self,current_hand)
+                testable_hand = Main.CreatedHandToTestableHand(self,sorted_hand)
+                Main.ShowHand(self,testable_hand) 
+                prediction = Main.TestHand(self,testable_hand)         
+                print(str(i+1)+'/'+str(TrainingSetSize))         
+                y = int(input("Correct: 1, Not_correct: 0 or Not sure: 3 ?"))
+                line_written=''
+                for card in sorted_hand:
+                    line_written += card+pv
+                if y==1:
+                    prediction=str(prediction)
+                    line_written += prediction + '\n'
+                    TrainingFile.write(line_written)
+                if y==0:
+                    prediction=str(1-prediction)
+                    line_written += prediction + '\n'
+                    TrainingFile.write(line_written)
+                if y==3:
+                    y=str(y)
+                    line_written += y + '\n'
+                    QuestionFile.write(line_written)
+                if y==9:
+                    break 
+        print('Written !')
+
+    def TrainingSetToDocs(self,TrainingFileName):
+        training_set = pd.read_csv('Training_set_'+self.DeckName+'/'+TrainingFileName+'.csv',sep =';',header=None)
         training_set = np.copy(training_set)
         docs = []
         for line in training_set:
@@ -185,9 +271,9 @@ class Training:
         labels = training_set[:,7]           
         return(docs,labels)
 
-    def new_features_from_docs(self,docs,labels,training_file_name):
+    def WriteTraininsSetFeatureFromDocs(self,docs,labels,TrainingFileName):
         pv =';'
-        with open(training_file_name+'.csv' , 'w') as training_file:
+        with open('Training_set_'+self.DeckName+'/'+TrainingFileName+'.csv' , 'w') as TrainingFile:
             for i in range(len(docs)):
                 docs_i = Main.SortHand(self,docs[i].split())
                 line_to_write=''
@@ -197,5 +283,24 @@ class Training:
                     for k in range(K):
                         line_to_write += str(int(feature_card[k]))+pv
                 line_to_write+=str(labels[i])
-                training_file.write(line_to_write+'\n')
-        print('Done !')  
+                TrainingFile.write(line_to_write+'\n')
+        print('Done !')
+
+    def TransformTrainingSet(self,TrainingFileName,copy=True):
+        docs,labels = Train.TrainingSetToDocs(self,TrainingFileName)
+        if copy :
+            Train.WriteTraininsSetFeatureFromDocs(self,docs,labels,'TrainingSet_copy')
+        else :
+            Train.WriteTraininsSetFeatureFromDocs(self,docs,labels,'TrainingSet')
+
+    def TrainAndSaveWeights(self,save=True):
+        data = np.copy(pd.read_csv('Training_set_'+self.DeckName+'/TrainingSet.csv',sep=';',header=None))
+        X, y = data[:,:-1],data[:,-1]
+        print("N_examples : ",X.shape[0])
+        MLModel = RandomForestClassifier(n_estimators=100, random_state=0)
+        MLModel.fit(X, y)
+        print(MLModel.score(X,y))
+        self.ModelML = MLModel
+        if save:
+            joblib.dump(MLModel,'Training_set_'+self.DeckName+'/'+self.DeckName+'SavedWeights.pkl')
+
