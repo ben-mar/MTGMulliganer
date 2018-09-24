@@ -95,11 +95,11 @@ class Main:
         hand = testable_hand[0]
         list_im =[]
         for word in hand.split():
-            list_im.append('images_'+self.DeckName+'/'+word.lower()+'.jpg')
+            list_im.append('Pictures_'+self.DeckName+'/'+word.lower()+'.jpg')
         imgs    = [ Image.open(i) for i in list_im ]
         min_shape = sorted( [(np.sum(i.size), i.size ) for i in imgs])[0][1]
         imgs_comb = np.hstack( (np.asarray( i.resize(min_shape) ) for i in imgs ) )
-        plt.figure(figsize=(20, 16), dpi= 100, facecolor='w', edgecolor='k')
+        plt.figure(figsize=(75,75), dpi= 50)
         plt.imshow(imgs_comb)
         plt.axis('off')
         plt.show()  
@@ -117,16 +117,25 @@ class Main:
             testable_hand_RFC = np.concatenate((testable_hand_RFC,converted_card))
         return([testable_hand_RFC])
 
+    def displayPrediction(self,prediction):
+        if prediction == 1:
+            img =  Image.open('Pictures/Keep.PNG')
+            plt.figure(figsize=(75,75), dpi= 40)
+            plt.imshow(img)
+            plt.axis('off')
+            plt.show()
+
+        if prediction == 0:
+            img =  Image.open('Pictures/Mulligan.PNG')
+            plt.figure(figsize=(75,75), dpi= 40)
+            plt.imshow(img)
+            plt.axis('off')
+            plt.show()
 
     def TestHand(self,testable_hand): 
         testable_hand_RFC = Main.TestableHandForRFC(self,testable_hand)
         prediction = self.ModelML.predict(testable_hand_RFC)[0]
-        if prediction == 1:
-            print('-------------------------------------------------------KEEP-------------------------------------------------------','\n')
-            print('\n')
-        else :
-            print('-------------------------------------------------------MULL-------------------------------------------------------','\n')
-            print('\n')
+        Main.displayPrediction(self,prediction)
         return prediction
 
     def RunHand(self,hand):
@@ -164,9 +173,9 @@ class Train:
             for i in range(TrainingSetSize):
                 current_hand = Main.CreateHand(self,self.DeckList,n)
                 sorted_hand = Main.SortHand(self,current_hand)
-                testable_sorted_hand = Main.CreatedHandToTestableHand(self,sorted_hand)         
-                Main.ShowHand(self,testable_sorted_hand)
-                print(str(i+1)+'/'+str(TrainingSetSize))              
+                testable_sorted_hand = Main.CreatedHandToTestableHand(self,sorted_hand)
+                print(str(i+1)+'/'+str(TrainingSetSize))           
+                Main.ShowHand(self,testable_sorted_hand)            
                 y = input("Keep: 1, Mull: 0 or Not sure: 3 ?")
                 line_written=''
                 for card in sorted_hand:
@@ -192,9 +201,9 @@ class Train:
                 current_hand = Main.CreateHand(self,self.DeckList,n)
                 sorted_hand = Main.SortHand(self,current_hand)
                 testable_hand = Main.CreatedHandToTestableHand(self,sorted_hand)
+                print(str(i+1)+'/'+str(TrainingSetSize))  
                 Main.ShowHand(self,testable_hand) 
-                prediction = Main.TestHand(self,testable_hand)
-                print(str(i+1)+'/'+str(TrainingSetSize))         
+                prediction = Main.TestHand(self,testable_hand)     
                 y = int(input("Correct: 1, Not_correct: 0 or Not sure: 3 ?"))
                 line_written=''
                 for card in sorted_hand:
@@ -229,18 +238,18 @@ class Train:
         pv =';'
         with open('Training_set_'+self.DeckName+'/'+TrainingFileName+'.csv' , 'a+') as TrainingFile,\
         open('Training_set_'+self.DeckName+'/'+TrainingFileName+'Question.csv' , 'a+') as QuestionFile:
-            #deck_list = decklist(deck_dict)
+            
             for i in range(TrainingSetSize):
-                #current_hand = create_hand(deck_list,n)
+                
                 current_hand_lands = Main.CreateHand(self,self.LandList,n_lands)
                 current_hand_non_land = Main.CreateHand(self,self.NonLandList,n-n_lands)
                 current_hand = current_hand_lands+current_hand_non_land
                 
                 sorted_hand = Main.SortHand(self,current_hand)
                 testable_hand = Main.CreatedHandToTestableHand(self,sorted_hand)
+                print(str(i+1)+'/'+str(TrainingSetSize))  
                 Main.ShowHand(self,testable_hand) 
-                prediction = Main.TestHand(self,testable_hand)         
-                print(str(i+1)+'/'+str(TrainingSetSize))         
+                prediction = Main.TestHand(self,testable_hand)              
                 y = int(input("Correct: 1, Not_correct: 0 or Not sure: 3 ?"))
                 line_written=''
                 for card in sorted_hand:
