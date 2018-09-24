@@ -159,15 +159,15 @@ class Train:
 
     def MakeTrainingSet(self,n,TrainingSetSize,TrainingFileName):
         pv =';'
-        with open('Training_set_'+self.DeckName+'/'+TrainingFileName+'.csv' , 'w') as TrainingFile,\
-        open('Training_set_'+self.DeckName+'/'+TrainingFileName+'question.csv' , 'w') as QuestionFile:
+        with open('Training_set_'+self.DeckName+'/'+TrainingFileName+'.csv' , 'a+') as TrainingFile,\
+        open('Training_set_'+self.DeckName+'/'+TrainingFileName+'Question.csv' , 'a+') as QuestionFile:
             for i in range(TrainingSetSize):
                 current_hand = Main.CreateHand(self,self.DeckList,n)
                 sorted_hand = Main.SortHand(self,current_hand)
                 testable_sorted_hand = Main.CreatedHandToTestableHand(self,sorted_hand)         
-                Main.ShowHand(self,testable_sorted_hand)           
+                Main.ShowHand(self,testable_sorted_hand)
+                print(str(i+1)+'/'+str(TrainingSetSize))              
                 y = input("Keep: 1, Mull: 0 or Not sure: 3 ?")
-                print(str(i+1)+'/'+str(TrainingSetSize))   
                 line_written=''
                 for card in sorted_hand:
                     line_written += card+pv
@@ -186,8 +186,8 @@ class Train:
         CurrentDeckMLModel.LoadModel()
         self.ModelML = CurrentDeckMLModel.ModelML
         pv =';'
-        with open('Training_set_'+self.DeckName+'/'+TrainingFileName+'_Model.csv' , 'w') as TrainingFile,\
-        open('Training_set_'+self.DeckName+'/'+TrainingFileName+'_ModelQuestion.csv' , 'w') as QuestionFile:
+        with open('Training_set_'+self.DeckName+'/'+TrainingFileName+'.csv' , 'a+') as TrainingFile,\
+        open('Training_set_'+self.DeckName+'/'+TrainingFileName+'Question.csv' , 'a+') as QuestionFile:
             for i in range(TrainingSetSize):
                 current_hand = Main.CreateHand(self,self.DeckList,n)
                 sorted_hand = Main.SortHand(self,current_hand)
