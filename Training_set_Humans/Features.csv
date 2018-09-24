@@ -1,0 +1,19 @@
+ name_of_the_card;index;CCM;type_of_card;produces_W;produces_U;produces_G;produces_MULTICOLOR;land_cast_NC_spells;Need_W;Need_U;Need_B;Need_R;Need_G;Need_generic;Is_human;power;Toughness;legendary
+island;0;0;0;0;1;0;0;1;0;0;0;0;0;0;0;0;0;0
+plains;1;0;0;0;0;0;0;1;0;0;0;0;0;0;0;0;0;0
+seachrome_coast;2;0;0;1;1;0;0;1;0;0;0;0;0;0;0;0;0;0
+unclaimed_territory;3;0;0;0;0;0;1;1;0;0;0;0;0;0;0;0;0;0
+ancient_ziggurat;4;0;0;0;0;0;1;0;0;0;0;0;0;0;0;0;0;0
+cavern_of_souls;5;0;0;0;0;0;1;1;0;0;0;0;0;0;0;0;0;0
+horizon_canopy;6;0;0;1;0;1;0;1;0;0;0;0;0;0;0;0;0;0
+aether_vial;7;1;2;0;0;0;0;0;0;0;0;0;0;1;0;0;0;0
+noble_hierarch;8;1;1;1;1;1;0;0;0;0;0;0;1;0;1;0;1;0
+champion_of_the_parish;9;1;1;0;0;0;0;0;1;0;0;0;0;0;1;1;1;0
+kitesail_freebooter;10;2;1;0;0;0;0;0;0;0;1;0;0;1;1;1;2;0
+meddling_mage;11;2;1;0;0;0;0;0;1;1;0;0;0;0;1;2;2;0
+phantasmal_image;12;2;1;0;0;0;0;0;0;1;0;0;0;1;0;0;0;0
+thalia_guardian_of_thraben;13;2;1;0;0;0;0;0;1;0;0;0;0;1;1;2;1;1
+thalia_lieutenant;14;2;1;0;0;0;0;0;1;0;0;0;0;1;1;1;1;0
+mantis_rider;15;3;1;0;0;0;0;0;1;1;0;1;0;0;1;3;3;0
+militia_bugler;16;3;1;0;0;0;0;0;1;0;0;0;0;2;1;2;3;0
+reflector_mage;17;3;1;0;0;0;0;0;1;1;0;0;0;1;1;2;3;0
