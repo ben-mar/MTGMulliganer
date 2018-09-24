@@ -144,8 +144,11 @@ class Main:
         Main.ShowHand(self,testable_hand)
         Main.TestHand(self,testable_hand)
 
-    def TestModel(self,deck_dict,n_test):
-        for _ in range(n_test):  
+    def TestModel(self,n):
+        if len(self.DeckList) ==0:
+            print('Error, DeckList is empty, perhaps DeckDict has been forgotten ?')
+            return 
+        for _ in range(n):  
             created_hand = Main.CreateHand(self,self.DeckList,7)
             testable_hand = Main.CreatedHandToTestableHand(self,created_hand)
             Main.RunHand(self,testable_hand)
@@ -173,10 +176,9 @@ class Train:
             for i in range(TrainingSetSize):
                 current_hand = Main.CreateHand(self,self.DeckList,n)
                 sorted_hand = Main.SortHand(self,current_hand)
-                testable_sorted_hand = Main.CreatedHandToTestableHand(self,sorted_hand)
-                print(str(i+1)+'/'+str(TrainingSetSize))           
+                testable_sorted_hand = Main.CreatedHandToTestableHand(self,sorted_hand)        
                 Main.ShowHand(self,testable_sorted_hand)            
-                y = input("Keep: 1, Mull: 0 or Not sure: 3 ?")
+                y = input("training example : "+str(i+1)+" / "+str(TrainingSetSize)+" | Keep: 1, Mull: 0 or Not sure: 3 ?")
                 line_written=''
                 for card in sorted_hand:
                     line_written += card+pv
@@ -201,10 +203,9 @@ class Train:
                 current_hand = Main.CreateHand(self,self.DeckList,n)
                 sorted_hand = Main.SortHand(self,current_hand)
                 testable_hand = Main.CreatedHandToTestableHand(self,sorted_hand)
-                print(str(i+1)+'/'+str(TrainingSetSize))  
                 Main.ShowHand(self,testable_hand) 
                 prediction = Main.TestHand(self,testable_hand)     
-                y = int(input("Correct: 1, Not_correct: 0 or Not sure: 3 ?"))
+                y = int(input("training example : "+str(i+1)+" / "+str(TrainingSetSize)+" | Correct: 1, Not_correct: 0 or Not sure: 3 ?"))
                 line_written=''
                 for card in sorted_hand:
                     line_written += card+pv
@@ -250,7 +251,7 @@ class Train:
                 print(str(i+1)+'/'+str(TrainingSetSize))  
                 Main.ShowHand(self,testable_hand) 
                 prediction = Main.TestHand(self,testable_hand)              
-                y = int(input("Correct: 1, Not_correct: 0 or Not sure: 3 ?"))
+                y = int(input("training example : "+str(i+1)+" / "+str(TrainingSetSize)+" | Correct: 1, Not_correct: 0 or Not sure: 3 ?"))
                 line_written=''
                 for card in sorted_hand:
                     line_written += card+pv
