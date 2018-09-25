@@ -28,18 +28,6 @@ class Deck:
         card_list = list(np.copy(pd.read_csv('Training_set_'+self.DeckName+'/Features.csv',sep=';'))[:,0])
         return card_list
 
-    def GetDeckName(self):
-        return self.DeckName
-
-    def GetDeckList(self):
-        return self.DeckList
-
-    def GetCardList(self):
-        return self.CardList
-
-    def GetFeatures(self):
-        return self.Features
-
 class ML:
 
     def __init__(self,DeckName):
@@ -54,6 +42,7 @@ class Main:
         CurrentDeck = Deck(DeckName,DeckDict)
         CurrentDeckMLModel = ML(DeckName)
         CurrentDeckMLModel.LoadModel()
+        self.DeckDict = CurrentDeck.DeckDict
         self.DeckList = CurrentDeck.DeckList
         self.CardList = CurrentDeck.CardList
         self.Features = CurrentDeck.Features
@@ -144,12 +133,36 @@ class Main:
         Main.ShowHand(self,testable_hand)
         Main.TestHand(self,testable_hand)
 
-    def TestModel(self,n):
+    def TestModel(self,n,DictList=[],nList=[7]):
+        if DictList == []:
+            DictList = [self.DeckDict]
+        len_DictList = len(DictList)
+        len_nList = len(nList)
         if len(self.DeckList) ==0:
             print('Error, DeckList is empty, perhaps DeckDict has been forgotten ?')
+            return
+        if len_DictList == 0:
+            print('Error, DictList is empty, you need to give to this method a List of dictionnaries !')
             return 
+        if len_nList == 0:
+            print('Error, nList is empty, you need to give to this method a List of numbers of cards !')
+            return
+        if len_DictList !=  len_nList :
+            print('Error, There is too much Dictionnaries in DictList or to much numbers in nList !')
+            return
+        if np.sum(nList)!=7:
+            print('Error, The sum of nList is not equal to n')
+            return
+
+        ListOfDeckLists = []
+        for k in range(len_nList):
+            Deck_k = Deck(self.DeckName,DictList[k])
+            ListOfDeckLists.append(Deck_k.DeckList)  
+        
         for _ in range(n):  
-            created_hand = Main.CreateHand(self,self.DeckList,7)
+            created_hand = []
+            for k in range(len_nList):
+                created_hand += Main.CreateHand(self,ListOfDeckLists[k],nList[k])   
             testable_hand = Main.CreatedHandToTestableHand(self,created_hand)
             Main.RunHand(self,testable_hand)
 
@@ -242,7 +255,7 @@ class Train:
             print('Error, nList is empty, you need to give to this method a List of numbers of cards !')
             return
         if len_DictList !=  len_nList :
-            print('Error, There is too much Dictionnaries in DictList or to much numbers in nList !')
+            print('Error, There is too much Dictionnaries in DictList or too much numbers in nList !')
             return
         if np.sum(nList)!=n:
             print('Error, The sum of nList is not equal to n')
