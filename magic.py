@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 from PIL import Image
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.externals import joblib
-
+from sklearn.model_selection import train_test_split
 
 
 class Deck:
@@ -329,3 +329,15 @@ class Train:
         self.ModelML = MLModel
         if save:
             joblib.dump(MLModel,'Training_set_'+self.DeckName+'/'+self.DeckName+'SavedWeights.pkl')
+    
+    def TrainAndTest(self,TestSize):
+        data = np.copy(pd.read_csv('Training_set_'+self.DeckName+'/TrainingSet.csv',sep=';',header=None))
+        X, y = data[:,:-1],data[:,-1]
+        print("N_examples : ",X.shape[0])
+        MLModel = RandomForestClassifier(n_estimators=100, random_state=0)
+        X_train,X_test,y_train,y_test = train_test_split(X, y, test_size=TestSize)
+        print("N_training examples : ",X_train.shape[0])
+        print("N_test examples : ",X_test.shape[0])
+        MLModel.fit(X_train,y_train)
+        print(MLModel.score(X_train,y_train))
+        print(MLModel.score(X_test,y_test))
