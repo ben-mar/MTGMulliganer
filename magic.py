@@ -225,29 +225,49 @@ class Train:
         print('Written !')
 
 
-    def MakeControlledTrainingSetWithModel(self,n,n_lands,TrainingSetSize,TrainingFileName):
-        if len(self.NonLandList) == 0:
-            print('Error, NonLandList is empty, perhaps NonLandDict has been forgotten ?')
+    def MakeControlledTrainingSetWithModel(self,n,DictList,nList,TrainingSetSize,TrainingFileName):
+
+        """
+        - n represents the number of cards you want in your hand.
+        - DictList represents the list of python dictionnaries you want to create your hand with.
+        - nList represents the list of number of cards (integers) you want to pick from each dictionnary in DictList, respectively.
+
+        """
+        len_DictList = len(DictList)
+        len_nList = len(nList)
+        if len_DictList == 0:
+            print('Error, DictList is empty, you need to give to this method a List of dictionnaries !')
             return 
-        if len(self.LandList) == 0:
-            print('Error, LandList is empty, perhaps LandDict has been forgotten ?')
+        if len_nList == 0:
+            print('Error, nList is empty, you need to give to this method a List of numbers of cards !')
+            return
+        if len_DictList !=  len_nList :
+            print('Error, There is too much Dictionnaries in DictList or to much numbers in nList !')
+            return
+        if np.sum(nList)!=n:
+            print('Error, The sum of nList is not equal to n')
             return 
+
+        ListOfDeckLists = []
+        for k in range(len_nList):
+            Deck_k = Deck(self.DeckName,DictList[k])
+            ListOfDeckLists.append(Deck_k.DeckList)     
+
         CurrentDeckMLModel = ML(self.DeckName)
         CurrentDeckMLModel.LoadModel()
         self.ModelML = CurrentDeckMLModel.ModelML
+
         pv =';'
         with open('Training_set_'+self.DeckName+'/'+TrainingFileName+'.csv' , 'a+') as TrainingFile,\
         open('Training_set_'+self.DeckName+'/'+TrainingFileName+'Question.csv' , 'a+') as QuestionFile:
             
             for i in range(TrainingSetSize):
-                
-                current_hand_lands = Main.CreateHand(self,self.LandList,n_lands)
-                current_hand_non_land = Main.CreateHand(self,self.NonLandList,n-n_lands)
-                current_hand = current_hand_lands+current_hand_non_land
+                current_hand = []
+                for k in range(len_nList):
+                    current_hand += Main.CreateHand(self,ListOfDeckLists[k],nList[k])   
                 
                 sorted_hand = Main.SortHand(self,current_hand)
                 testable_hand = Main.CreatedHandToTestableHand(self,sorted_hand)
-                print(str(i+1)+'/'+str(TrainingSetSize))  
                 Main.ShowHand(self,testable_hand) 
                 prediction = Main.TestHand(self,testable_hand)              
                 y = int(input("training example : "+str(i+1)+" / "+str(TrainingSetSize)+" | Correct: 1, Not_correct: 0 or Not sure: 3 ?"))
@@ -309,4 +329,3 @@ class Train:
         self.ModelML = MLModel
         if save:
             joblib.dump(MLModel,'Training_set_'+self.DeckName+'/'+self.DeckName+'SavedWeights.pkl')
-
