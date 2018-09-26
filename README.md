@@ -11,10 +11,10 @@ ETA on the quality of Mulligans :
   
 To run a hand use the following :
 
-# 1) imports the magic.py file
+#imports the magic.py file
 from magic import *
 
-# 2) If you want BantSpirit 
+#If you want BantSpirit 
 mulliganer = Main('BantSpirit')
 
 #or if you want Burn
@@ -23,8 +23,8 @@ mulliganer = Main('Burn')
 #or if you want Humans
 mulliganer = Main('Humans') 
 
-# 3) Then write the hand you want to test (here it's spirit)
+#Then write the hand you want to test (here it's spirit)
 hand = [' horizon_canopy moorland_haunt cavern_of_souls  mausoleum_wanderer mausoleum_wanderer supreme_phantom collected_company ']
 
-# 4) Test your hand ! 
+#Test your hand ! 
 mulliganer.RunHand(hand)
