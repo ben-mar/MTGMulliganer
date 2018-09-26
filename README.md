@@ -11,10 +11,10 @@ ETA on the quality of Mulligans :
   
 To run a hand use the following :
 
-#imports the magic.py file
+Imports the magic.py file:
 from magic import *
 
-#If you want BantSpirit 
+If you want BantSpirit:
 mulliganer = Main('BantSpirit')
 
 #or if you want Burn
