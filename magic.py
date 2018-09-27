@@ -327,9 +327,9 @@ class Train:
                 TrainingFile.write(line_to_write+'\n')
         print('Done !')
 
-    def TransformTrainingSet(self,TrainingFileName):
-        docs,labels = Train.TrainingSetToDocs(self,TrainingFileName)
-        Train.WriteTraininsSetFeatureFromDocs(self,docs,labels,'TrainingSet')
+    def TransformTrainingSet(self,TrainingFileInput,TrainingFileOutput= 'TrainingSet'):
+        docs,labels = Train.TrainingSetToDocs(self,TrainingFileInput)
+        Train.WriteTraininsSetFeatureFromDocs(self,docs,labels,TrainingFileOutput)
 
     def TrainAndSaveWeights(self,save=True):
         data = np.copy(pd.read_csv('Training_set_'+self.DeckName+'/TrainingSet.csv',sep=';',header=None))
@@ -342,14 +342,21 @@ class Train:
         if save:
             joblib.dump(MLModel,'Training_set_'+self.DeckName+'/'+self.DeckName+'SavedWeights.pkl')
     
-    def TrainAndTest(self,TestSize):
+    def TrainAndTest(self,TestSize=0,TestingFileInput=''):
         data = np.copy(pd.read_csv('Training_set_'+self.DeckName+'/TrainingSet.csv',sep=';',header=None))
         X, y = data[:,:-1],data[:,-1]
         print("N_examples : ",X.shape[0])
         MLModel = RandomForestClassifier(n_estimators=100, random_state=0)
-        X_train,X_test,y_train,y_test = train_test_split(X, y, test_size=TestSize)
-        print("N_training examples : ",X_train.shape[0])
-        print("N_test examples : ",X_test.shape[0])
+        if TestSize==0:
+            TestData = np.copy(pd.read_csv('Training_set_'+self.DeckName+'/'+TestingFileInput+'.csv',sep=';',header=None))
+            X_test, y_test = TestData[:,:-1],TestData[:,-1]
+            X_train, y_train = X, y
+            print("N_training examples : ",X_train.shape[0])
+            print("N_test examples : ",X_test.shape[0])
+        elif TestingFileInput == '':
+            X_train,X_test,y_train,y_test = train_test_split(X, y, test_size=TestSize)
+            print("N_training examples : ",X_train.shape[0])
+            print("N_test examples : ",X_test.shape[0])
         MLModel.fit(X_train,y_train)
         print(MLModel.score(X_train,y_train))
         print(MLModel.score(X_test,y_test))
