@@ -346,7 +346,6 @@ class Train:
         data = np.copy(pd.read_csv('Training_set_'+self.DeckName+'/TrainingSet.csv',sep=';',header=None))
         X, y = data[:,:-1],data[:,-1]
         print("N_examples : ",X.shape[0])
-        MLModel = RandomForestClassifier(n_estimators=100, random_state=0)
         if TestSize==0:
             TestData = np.copy(pd.read_csv('Training_set_'+self.DeckName+'/'+TestingFileInput+'.csv',sep=';',header=None))
             X_test, y_test = TestData[:,:-1],TestData[:,-1]
@@ -357,6 +356,7 @@ class Train:
             X_train,X_test,y_train,y_test = train_test_split(X, y, test_size=TestSize)
             print("N_training examples : ",X_train.shape[0])
             print("N_test examples : ",X_test.shape[0])
+        MLModel = RandomForestClassifier(n_estimators=100, random_state=0)
         MLModel.fit(X_train,y_train)
         print(MLModel.score(X_train,y_train))
         print(MLModel.score(X_test,y_test))
