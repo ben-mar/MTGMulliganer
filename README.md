@@ -34,3 +34,8 @@ hand = [' horizon_canopy moorland_haunt cavern_of_souls  mausoleum_wanderer maus
 #Test your hand ! 
 
 mulliganer.RunHand(hand)
+
+
+# worth noting ! 
+
+The parameter "TrainingSetSize" has been set to 0 in every cell of the notebook in order not to have any picture in the notebook that are extremely heavy in MB. Try 10 to try for instance !
