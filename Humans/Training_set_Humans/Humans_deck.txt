@@ -1,0 +1,70 @@
+4 Champion of the Parish
+4 Kitesail Freebooter
+4 Mantis Rider
+4 Meddling Mage
+3 Militia Bugler
+4 Noble Hierarch
+4 Phantasmal Image
+3 Reflector Mage
+3 Thalia, Guardian of Thraben
+4 Thalia's Lieutenant
+4 Aether Vial
+4 Ancient Ziggurat
+4 Cavern of Souls
+4 Horizon Canopy
+1 Island
+1 Plains
+1 Seachrome Coast
+4 Unclaimed Territory
+
+
+Sideboard
+2 Militia Bugler
+2 Auriok Champion
+1 Damping Sphere
+1 Dismember
+2 Fourth Bridge Prowler
+1 Grafdigger's Cage
+2 Izzet Staticaster
+2 Kataki, War's Wage
+2 Sin Collector
+
+
+DeckDictHumans  =  {"island":1,
+                    "plains":1,
+                    "seachrome_coast":1,
+                    "unclaimed_territory":4,
+                    "ancient_ziggurat":4,
+                    "cavern_of_souls":4,
+                    "horizon_canopy":4,
+                    "aether_vial":4,
+                    "noble_hierarch":4,
+                    "champion_of_the_parish":4,
+                    "kitesail_freebooter":4,
+                    "meddling_mage":4,
+                    "phantasmal_image":4,
+                    "thalia_guardian_of_thraben":3,
+                    "thalia_lieutenant":4,
+                    "mantis_rider":4,
+                    "militia_bugler":3,
+                    "reflector_mage":3}
+
+NonLandDict   =    {"aether_vial":4,
+                    "noble_hierarch":4,
+                    "champion_of_the_parish":4,
+                    "kitesail_freebooter":4,
+                    "meddling_mage":4,
+                    "phantasmal_image":4,
+                    "thalia_guardian_of_thraben":3,
+                    "thalia_lieutenant":4,
+                    "mantis_rider":4,
+                    "militia_bugler":3,
+                    "reflector_mage":3}
+
+LandDict    =      {"island":1,
+                    "plains":1,
+                    "seachrome_coast":1,
+                    "unclaimed_territory":4,
+                    "ancient_ziggurat":4,
+                    "cavern_of_souls":4,
+                    "horizon_canopy":4}

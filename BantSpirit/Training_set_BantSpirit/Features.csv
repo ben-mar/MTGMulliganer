@@ -1,0 +1,27 @@
+ name_of_the_card;index;CCM;type_of_card;produces_W;produces_U;produces_G;produces_colorless;Need_W;Need_U;Need_G;Need_generic;Is_lord;power;Toughness
+plains;0;0;0;1;0;0;0;0;0;0;0;0;0;0
+island;1;0;0;0;1;0;0;0;0;0;0;0;0;0
+forest;2;0;0;0;0;1;0;0;0;0;0;0;0;0
+hallowed_fountain;3;0;0;1;1;0;0;0;0;0;0;0;0;0
+temple_garden;4;0;0;1;0;1;0;0;0;0;0;0;0;0
+breeding_pool;5;0;0;0;1;1;0;0;0;0;0;0;0;0
+botanical_sanctum;6;0;0;0;1;1;0;0;0;0;0;0;0;0
+seachrome_coast;7;0;0;1;1;0;0;0;0;0;0;0;0;0
+horizon_canopy;8;0;0;1;0;1;0;0;0;0;0;0;0;0
+cavern_of_souls;9;0;0;0;1;0;1;0;0;0;0;0;0;0
+moorland_haunt;10;0;0;0;0;0;1;0;0;0;0;0;0;0
+windswept_heath;11;0;0;1;1;1;0;0;0;0;0;0;0;0
+flooded_strand;12;0;0;1;1;1;0;0;0;0;0;0;0;0
+misty_rainforest;13;0;0;1;1;1;0;0;0;0;0;0;0;0
+aether_vial;14;1;3;0;0;0;0;0;0;0;1;0;0;0
+path_to_exile;15;1;2;0;0;0;0;1;0;0;0;0;0;0
+noble_hierarch;16;1;1;0;0;0;0;0;0;1;0;0;0;1
+mausoleum_wanderer;17;1;1;1;1;1;0;0;1;0;0;0;1;1
+rattlechains;18;2;1;0;0;0;0;0;1;0;1;0;2;1
+selfless_spirit;19;2;1;0;0;0;0;1;0;0;1;0;2;1
+phantasmal_image;20;2;1;0;0;0;0;0;1;0;1;0;0;0
+supreme_phantom;21;2;1;0;0;0;0;0;1;0;1;1;1;3
+spell_queller;22;3;1;0;0;0;0;1;1;0;1;0;2;3
+drogskol_captain;23;3;1;0;0;0;0;1;1;0;1;1;2;2
+geist_of_saint_traft;24;3;1;0;0;0;0;1;1;0;1;0;2;2
+collected_company;25;4;2;0;0;0;0;0;0;1;3;0;0;0

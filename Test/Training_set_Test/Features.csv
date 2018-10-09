@@ -1,0 +1,5 @@
+ name_of_the_card;index;CCM;type_of_card;Color produced (if land);Color needed (if not land)
+sacred_foundry;0;1;2;3;4
+wooded_foothills;59;5;6;7;8
+mountain;87;9;10;11;12
+stomping_ground;66;13;14;15;16
