@@ -15,17 +15,11 @@ To run a hand use the following :
 #Imports the magic.py file:
 from magic import *
 
-#If you want BantSpirit:
+#If you want BantSpirit : (type 'Burn' for Burn and 'Humans' for Humans)
 mulliganer = Main('BantSpirit')
 
-#or if you want Burn:
-mulliganer = Main('Burn') 
-
-#or if you want Humans:
-mulliganer = Main('Humans') 
-
 #Then write the hand you want to test (here it's spirit):
-hand = [' horizon_canopy moorland_haunt cavern_of_souls  mausoleum_wanderer mausoleum_wanderer supreme_phantom collected_company ']
+hand = 'horizon_canopy moorland_haunt cavern_of_souls  mausoleum_wanderer mausoleum_wanderer supreme_phantom collected_company'
 
 #Test your hand ! 
 mulliganer.RunHand(hand)
