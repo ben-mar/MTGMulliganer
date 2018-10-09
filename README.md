@@ -7,7 +7,7 @@ ETA on the quality of Mulligans :
 
   * Burn : Ok
   * 5C humans : Needs more data
-  * Bant Spirit : Needs more data
+  * Bant Spirit : Ok
   
 To run a hand use the following :
 
