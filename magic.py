@@ -24,7 +24,12 @@ class Utility:
 
     def read(self,path,header=0):
         return np.copy(pd.read_csv(path,sep=';',header=header))
-
+    
+    def _DisplayImage(self,Image,FigSize,Dpi):
+        plt.figure(figsize=FigSize, dpi= Dpi)
+        plt.imshow(Image)
+        plt.axis('off')
+        plt.show() 
 
 class Deck:
 
@@ -32,18 +37,18 @@ class Deck:
         self.DeckDict = DeckDict
         self.DeckName = DeckName
         self.Features = Utility.read(self,self.DeckName+'/Training_set_'+self.DeckName+'/Features.csv')[:,NUMERIC_FEATURE_SPLIT:]
-        self.DeckList = Deck.decklist(self)
-        self.CardList = Deck.cardlist(self) 
+        self.DeckList = Deck._decklist(self)
+        self.CardList = Deck._cardlist(self) 
 
-    def decklist(self):
-        deck_list = []
+    def _decklist(self):
+        DeckList = []
         Cards = self.DeckDict.items()
         for Card,NumberOfCopy in Cards:
             for _ in range(NumberOfCopy):
-                deck_list.append(Card)
-        return deck_list
+                DeckList.append(Card)
+        return DeckList
 
-    def cardlist(self):
+    def _cardlist(self):
         CardList = Utility.read(self,self.DeckName+'/Training_set_'+self.DeckName+'/Features.csv')[:,NAME_CARDS_INDEX]
         CardList = list(CardList)
         return CardList
@@ -70,13 +75,13 @@ class Main:
         self.ModelML = CurrentDeckMLModel.ModelML
 
 
-    def CardsToIndex(self,DeckList):
+    def _CardsToIndex(self,DeckList):
         DeckListNumbers = []
         for Card in DeckList:
             DeckListNumbers.append(self.CardList.index(Card))
         return DeckListNumbers
 
-    def CreateHand(self,DeckList,n):
+    def _CreateHand(self,DeckList,n):
         """
         Creates hand from the DeckList with n cards in it, which is a list of n strings containing the names of the card.
         This kind of structure will be called HandNames from now on.
@@ -87,14 +92,14 @@ class Main:
             " only composed by the following cards {1}".format(n,DeckList,len(DeckList)))
             return          
 
-        DeckListNumbers = Main.CardsToIndex(self,DeckList) 
+        DeckListNumbers = Main._CardsToIndex(self,DeckList) 
         DeckListNumbersShuffled = [i for i in DeckListNumbers]
         np.random.shuffle(DeckListNumbersShuffled)
         HandNumbers = DeckListNumbersShuffled[0:n]
         HandNames = [self.CardList[i] for i in HandNumbers]
         return HandNames 
 
-    def CreateHandsFromDicts(self,n,DictList=[],nList=[NUMBERS_OF_CARDS_IN_HAND_NO_MULLIGAN]):
+    def CreateHandFromDicts(self,DictList=[],nList=[NUMBERS_OF_CARDS_IN_HAND_NO_MULLIGAN]):
         """
         - n represents the number of cards you want in your hand.
         - DictList represents the list of python dictionnaries you want to create your hand with.
@@ -128,11 +133,10 @@ class Main:
         for k in range(len_nList):
             Deck_k = Deck(self.DeckName,DictList[k])
             ListOfDeckLists.append(Deck_k.DeckList)
-        
-        for _ in range(n):  
-            HandNames = []
-            for k in range(len_nList):
-                HandNames += Main.CreateHand(self,ListOfDeckLists[k],nList[k])
+
+        HandNames = []
+        for k in range(len_nList):
+            HandNames += Main._CreateHand(self,ListOfDeckLists[k],nList[k])
         return HandNames
 
 
@@ -148,7 +152,7 @@ class Main:
         SortedHandNames = [self.CardList[i] for i in HandToSortNumbers]
         return (SortedHandNames)
 
-    def ConvertCardIntoFeatures(self,Card):
+    def _ConvertCardIntoFeatures(self,Card):
         """
         Takes a card as an input and returns a 1D array corresponding to the features of the card.
         """
@@ -156,7 +160,7 @@ class Main:
         CardFeature = self.Features[CardIndex]
         return(CardFeature)
     
-    def MakeTestableHand(self,HandNames):
+    def _MakeTestableHand(self,HandNames):
         """
         takes a hand that is a list of str (the different cards in it) as an input and returns a list of one numpy 1D-array representing 
         the features of the Cards, making the output ready for the Scikit-Learn.predict() function
@@ -164,7 +168,7 @@ class Main:
         TestableHand = []
         for i in range(len(HandNames)):
             Card_i = HandNames[i]
-            CardFeature_i = Main.ConvertCardIntoFeatures(self,Card_i)
+            CardFeature_i = Main._ConvertCardIntoFeatures(self,Card_i)
             TestableHand = np.concatenate((TestableHand,CardFeature_i))
         TestableHand = [TestableHand]
         return(TestableHand)
@@ -175,32 +179,23 @@ class Main:
             ImagesList.append(self.DeckName+'/Pictures_'+self.DeckName+'/'+Card+'.jpg')
         Images = [ Image.open(i) for i in ImagesList ]
         MinimumShape = sorted( [(np.sum(i.size), i.size ) for i in Images])[0][1]
-        imgs_comb = np.hstack( (np.asarray( i.resize(MinimumShape) ) for i in Images ) )
-        plt.figure(figsize=FIG_SIZE, dpi= DPI_SHOW_HAND)
-        plt.imshow(imgs_comb)
-        plt.axis('off')
-        plt.show() 
+        ImagesCombined = np.hstack( (np.asarray( i.resize(MinimumShape) ) for i in Images ) )
+        Utility._DisplayImage(self,ImagesCombined,FIG_SIZE,DPI_SHOW_HAND)
+        
 
-
-    def displayPrediction(self,prediction):
+    def _displayPrediction(self,prediction):
         if prediction == 1:
-            img =  Image.open('General/Pictures/Keep.PNG')
-            plt.figure(figsize=FIG_SIZE, dpi= DPI_DISPLAY_PREDICTION)
-            plt.imshow(img)
-            plt.axis('off')
-            plt.show()
+            Img =  Image.open('General/Pictures/Keep.PNG')
+            Utility._DisplayImage(self,Img,FIG_SIZE,DPI_DISPLAY_PREDICTION)
 
         if prediction == 0:
-            img =  Image.open('General/Pictures/Mulligan.PNG')
-            plt.figure(figsize=FIG_SIZE, dpi= DPI_DISPLAY_PREDICTION)
-            plt.imshow(img)
-            plt.axis('off')
-            plt.show()
+            Img =  Image.open('General/Pictures/Mulligan.PNG')
+            Utility._DisplayImage(self,Img,FIG_SIZE,DPI_DISPLAY_PREDICTION)
 
     def TestHand(self,HandNames): 
-        TestableHand = Main.MakeTestableHand(self,HandNames)
+        TestableHand = Main._MakeTestableHand(self,HandNames)
         prediction = self.ModelML.predict(TestableHand)[PREDICTION_INDEX]
-        Main.displayPrediction(self,prediction)
+        Main._displayPrediction(self,prediction)
         return prediction
 
     def RunHand(self,Hand):
@@ -214,7 +209,7 @@ class Main:
 
     def TestModel(self,n,DictList=[],nList=[NUMBERS_OF_CARDS_IN_HAND_NO_MULLIGAN]):
         for _ in range(n):  
-            HandNames = Main.CreateHandsFromDicts(self,n,DictList=DictList,nList=nList)
+            HandNames = Main.CreateHandFromDicts(self,DictList=DictList,nList=nList)
             Hand = ' '.join(HandNames)
             Main.RunHand(self,Hand)
 
@@ -233,20 +228,20 @@ class Train:
         with open(self.DeckName+'/Training_set_'+self.DeckName+'/'+TrainingFileName+'.csv' , 'a+') as TrainingFile,\
         open(self.DeckName+'/Training_set_'+self.DeckName+'/'+TrainingFileName+'Question.csv' , 'a+') as QuestionFile:
             for i in range(TrainingSetSize):
-                HandNames = Main.CreateHand(self,self.DeckList,n)
+                HandNames = Main._CreateHand(self,self.DeckList,n)
                 SortedHandNames = Main.SortHand(self,HandNames)     
                 Main.ShowHand(self,SortedHandNames)            
-                y = input("training example : "+str(i+1)+" / "+str(TrainingSetSize)+" | Keep: 1, Mull: 0 or Not sure: 3 ?")
+                Label = input("training example : "+str(i+1)+" / "+str(TrainingSetSize)+" | Keep: 1, Mull: 0 or Not sure: 3 ?")
                 LineWritten=''
                 for card in SortedHandNames:
                     LineWritten += card+pv
-                LineWritten += y + '\n'
-                y=int(y)
-                if y==1 or y==0:
+                LineWritten += Label + '\n'
+                Label=int(Label)
+                if Label==1 or Label==0:
                     TrainingFile.write(LineWritten)
-                if y==3:
+                if Label==3:
                     QuestionFile.write(LineWritten)
-                if y==9:
+                if Label==9:
                     break 
         print('Written !')
 
@@ -258,27 +253,27 @@ class Train:
         with open(self.DeckName+'/Training_set_'+self.DeckName+'/'+TrainingFileName+'.csv' , 'a+') as TrainingFile,\
         open(self.DeckName+'/Training_set_'+self.DeckName+'/'+TrainingFileName+'Question.csv' , 'a+') as QuestionFile:
             for i in range(TrainingSetSize):
-                HandNames = Main.CreateHand(self,self.DeckList,n)
+                HandNames = Main._CreateHand(self,self.DeckList,n)
                 SortedHandNames = Main.SortHand(self,HandNames)
                 Main.ShowHand(self,SortedHandNames)
                 Prediction = Main.TestHand(self,SortedHandNames)     
-                y = int(input("training example : "+str(i+1)+" / "+str(TrainingSetSize)+" | Correct: 1, Not_correct: 0 or Not sure: 3 ?"))
+                Label = int(input("training example : "+str(i+1)+" / "+str(TrainingSetSize)+" | Correct: 1, Not_correct: 0 or Not sure: 3 ?"))
                 line_written=''
                 for card in SortedHandNames:
                     line_written += card+pv
-                if y==1:
+                if Label==1:
                     Prediction=str(Prediction)
                     line_written += Prediction + '\n'
                     TrainingFile.write(line_written)
-                if y==0:
+                if Label==0:
                     Prediction=str(1-Prediction)
                     line_written += Prediction + '\n'
                     TrainingFile.write(line_written)
-                if y==3:
-                    y=str(y)
-                    line_written += y + '\n'
+                if Label==3:
+                    Label=str(Label)
+                    line_written += Label + '\n'
                     QuestionFile.write(line_written)
-                if y==9:
+                if Label==9:
                     break 
         print('Written !')
 
@@ -301,27 +296,27 @@ class Train:
         open(self.DeckName+'/Training_set_'+self.DeckName+'/'+TrainingFileName+'Question.csv' , 'a+') as QuestionFile:
             
             for i in range(TrainingSetSize):
-                HandNames = Main.CreateHandsFromDicts(self,n,DictList=DictList,nList=nList)
+                HandNames = Main.CreateHandFromDicts(self,DictList=DictList,nList=nList)
                 SortedHandNames = Main.SortHand(self,HandNames)
                 Main.ShowHand(self,SortedHandNames)
                 Prediction = Main.TestHand(self,SortedHandNames)              
-                y = int(input("training example : "+str(i+1)+" / "+str(TrainingSetSize)+" | Correct: 1, Not_correct: 0 or Not sure: 3 ?"))
+                Label = int(input("training example : "+str(i+1)+" / "+str(TrainingSetSize)+" | Correct: 1, Not_correct: 0 or Not sure: 3 ?"))
                 LineWritten=''
                 for Card in SortedHandNames:
                     LineWritten += Card+pv
-                if y==1:
+                if Label==1:
                     Prediction=str(Prediction)
                     LineWritten += Prediction + '\n'
                     TrainingFile.write(LineWritten)
-                if y==0:
+                if Label==0:
                     Prediction=str(1-Prediction)
                     LineWritten += Prediction + '\n'
                     TrainingFile.write(LineWritten)
-                if y==3:
-                    y=str(y)
-                    LineWritten += y + '\n'
+                if Label==3:
+                    Label=str(Label)
+                    LineWritten += Label + '\n'
                     QuestionFile.write(LineWritten)
-                if y==9:
+                if Label==9:
                     break 
         print('Written !')
 
@@ -334,7 +329,7 @@ class Train:
         Labels = TrainingSet[:,NUMBERS_OF_CARDS_IN_HAND_NO_MULLIGAN]           
         return(Docs,Labels)
 
-    # TODO : Clean this up !
+
     def WriteTrainingSetFeatureFromDocs(self,Docs,Labels,TrainingFileName):
         pv =';'
         with open(self.DeckName+'/Training_set_'+self.DeckName+'/'+TrainingFileName+'.csv' , 'w') as TrainingFile:
@@ -342,13 +337,13 @@ class Train:
                 Docs_i = Main.SortHand(self,Docs[i].split())
                 LineWritten=''
                 for j in range(NUMBERS_OF_CARDS_IN_HAND_NO_MULLIGAN):
-                    CardFeature = Main.ConvertCardIntoFeatures(self,Docs_i[j])
+                    CardFeature = Main._ConvertCardIntoFeatures(self,Docs_i[j])
                     K = len(CardFeature)
                     for k in range(K):
                         LineWritten += str(int(CardFeature[k]))+pv
                 LineWritten+=str(Labels[i])
                 TrainingFile.write(LineWritten+'\n')
-        print('Done !')
+        print('Written !')
 
     def TransformTrainingSet(self,TrainingFileInput,TrainingFileOutput= 'TrainingSet'):
         Docs,Labels = Train.TrainingSetToDocs(self,TrainingFileInput)

@@ -99,32 +99,31 @@ class MainTest(unittest.TestCase):
     
     def test_CardToIndex(self):
         DECKLISTNUMBERS = [1,1,3,0,0,0,2,2,2,2]
-        self.assertListEqual(magic.Main.CardsToIndex(self,self.DeckList),DECKLISTNUMBERS)
+        self.assertListEqual(magic.Main._CardsToIndex(self,self.DeckList),DECKLISTNUMBERS)
 
         DECKLISTTEST = ['wooded_foothills','wooded_foothills','sacred_foundry','sacred_foundry','sacred_foundry',
         'mountain','mountain']
         DECKLISTNUMBERS = [1,1,0,0,0,2,2]
-        self.assertListEqual(magic.Main.CardsToIndex(self,DECKLISTTEST),DECKLISTNUMBERS)
+        self.assertListEqual(magic.Main._CardsToIndex(self,DECKLISTTEST),DECKLISTNUMBERS)
 
     def test_CreateHand(self):
         HANDNOMULLLIGAN = ['stomping_ground','mountain','sacred_foundry','mountain','wooded_foothills','mountain','mountain']
         HANDONEMULLIGAN = ['stomping_ground','mountain','sacred_foundry','mountain','wooded_foothills','mountain']
 
         np.random.seed(0)
-        self.assertListEqual(magic.Main.CreateHand(self,self.DeckList,self.NumbersOfCardsInHandNoMulligan),
+        self.assertListEqual(magic.Main._CreateHand(self,self.DeckList,self.NumbersOfCardsInHandNoMulligan),
                 HANDNOMULLLIGAN)
 
         np.random.seed(0)
-        self.assertListEqual(magic.Main.CreateHand(self,self.DeckList,self.NumbersOfCardsInHandOneMulligan),
+        self.assertListEqual(magic.Main._CreateHand(self,self.DeckList,self.NumbersOfCardsInHandOneMulligan),
                 HANDONEMULLIGAN)
 
     def test_CreateHandsFromDicts(self):
         HANDNOMULLLIGAN = ['stomping_ground','mountain','sacred_foundry','mountain','wooded_foothills','mountain','mountain']
         HANDCREATEDFROMDICTS = ['mountain', 'mountain', 'mountain', 'sacred_foundry', 'sacred_foundry', 'sacred_foundry', 'sacred_foundry']
 
-        N=1
         np.random.seed(0)
-        self.assertListEqual(magic.Main.CreateHandsFromDicts(self,N),HANDNOMULLLIGAN)
+        self.assertListEqual(magic.Main.CreateHandFromDicts(self),HANDNOMULLLIGAN)
 
         DictMountain = {'mountain':1}
         DictMountain = {'mountain':1}
@@ -134,7 +133,7 @@ class MainTest(unittest.TestCase):
         nList = [1,1,1,4]
 
         np.random.seed(0)
-        self.assertListEqual(magic.Main.CreateHandsFromDicts(self,N,DictList = DictList,nList = nList),HANDCREATEDFROMDICTS)
+        self.assertListEqual(magic.Main.CreateHandFromDicts(self,DictList = DictList,nList = nList),HANDCREATEDFROMDICTS)
 
 
         DictMountain = {'mountain':3}
@@ -143,7 +142,7 @@ class MainTest(unittest.TestCase):
         nList = [3,4]
 
         np.random.seed(0)
-        self.assertListEqual(magic.Main.CreateHandsFromDicts(self,N,DictList = DictList,nList = nList),HANDCREATEDFROMDICTS)       
+        self.assertListEqual(magic.Main.CreateHandFromDicts(self,DictList = DictList,nList = nList),HANDCREATEDFROMDICTS)       
 
 
     def test_SortHand(self):
@@ -159,16 +158,16 @@ class MainTest(unittest.TestCase):
     def test_ConvertCardIntoFeatures(self):
         CARD = 'mountain'
         FEATURESOFCARD = np.array([87,9,10,11,12])
-        self.assertTrue((magic.Main.ConvertCardIntoFeatures(self,CARD)==FEATURESOFCARD).all())
+        self.assertTrue((magic.Main._ConvertCardIntoFeatures(self,CARD)==FEATURESOFCARD).all())
 
         CARD = 'sacred_foundry'
         FEATURESOFCARD = np.array([0,1,2,3,4])
-        self.assertTrue((magic.Main.ConvertCardIntoFeatures(self,CARD)==FEATURESOFCARD).all())
+        self.assertTrue((magic.Main._ConvertCardIntoFeatures(self,CARD)==FEATURESOFCARD).all())
 
     def test_MakeTestableHand(self):
         HANDNAMES = ['mountain','sacred_foundry','wooded_foothills','stomping_ground','wooded_foothills','stomping_ground','mountain']
         TESTABLEHAND = np.array([87,9,10,11,12,0,1,2,3,4,59,5,6,7,8,66,13,14,15,16,59,5,6,7,8,66,13,14,15,16,87,9,10,11,12])
-        self.assertTrue((magic.Main.MakeTestableHand(self,HANDNAMES)==TESTABLEHAND).all())
+        self.assertTrue((magic.Main._MakeTestableHand(self,HANDNAMES)==TESTABLEHAND).all())
 
     def test_ShowHand(self):
         """
@@ -183,8 +182,9 @@ class MainTest(unittest.TestCase):
     def test_displayPrediction(self):
         """
         hard to define at the moment since That would mean testing the Imshow() function
-        """ 
-        pass
+        """
+        Prediction = 0 
+        magic.Main._displayPrediction(self,Prediction)
 
     def test_TestHand(self):
         HANDNAMES = ['mountain','sacred_foundry','wooded_foothills','stomping_ground','wooded_foothills','stomping_ground','mountain']
