@@ -1,4 +1,5 @@
 import numpy as np
+from PIL import Image
 import unittest
 import magic
 
@@ -26,6 +27,12 @@ class UtilityTest(unittest.TestCase):
 
                 if not res[index_i,index_j]==READ_CSV[index_i][index_j]:
                     print(type(res[index_i,index_j]),type(READ_CSV[index_i][index_j]))
+                    
+    def test_displayImage(self):
+        DPI_DISPLAY_PREDICTION = 40
+        FIG_SIZE = (75,75)
+        Img =  Image.open('General/Pictures/Mulligan.PNG')
+        magic.Utility._DisplayImage(self,Img,FIG_SIZE,DPI_DISPLAY_PREDICTION) 
 
 class DeckTest(unittest.TestCase):
     """
