@@ -14,7 +14,18 @@ ETA on the quality of Mulligans :
   * Burn : Ok
   * 5C humans : Needs more data
   * Bant Spirit : Ok
-  
+
+# Dependecies
+
+You need to have the following packages installed in order to have this project work :
+
+ * numpy
+ * Pillow
+ * matplotlib
+ * pandas
+ * sklearn
+ * jupyter
+
 To run a hand use the following :
 
 ```
