@@ -25,6 +25,10 @@ You need to have the following packages installed in order to have this project 
  * pandas
  * sklearn
  * jupyter
+ 
+You can always install them with pip (type : "pip install NAME_OF_THE_PACKAGE" in your terminal) 
+
+# Run a hand
 
 To run a hand use the following :
 
@@ -33,6 +37,8 @@ To run a hand use the following :
 from magic import *
 
 #If you want BantSpirit : (type 'Burn' for Burn and 'Humans' for Humans)
+#Moreover if your computer is a bit old, you can try to add : Resolution ='low'.
+#It would give : mulliganer = Main('BantSpirit',Resolution = 'low')
 mulliganer = Main('BantSpirit')
 
 #Then write the hand you want to test (here it's spirit):
