@@ -37,7 +37,7 @@ To run a hand use the following :
 from magic import *
 
 #If you want BantSpirit : (type 'Burn' for Burn and 'Humans' for Humans)
-#Moreover if your computer is a bit old, you can try to add : Resolution ='low'.
+#Moreover if your computer is a bit old, you can try to add : Resolution ='low' to lower the resolution of the cards displayed
 #It would give : mulliganer = Main('BantSpirit',Resolution = 'low')
 mulliganer = Main('BantSpirit')
 
