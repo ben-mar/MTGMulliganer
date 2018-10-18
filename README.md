@@ -14,7 +14,22 @@ ETA on the quality of Mulligans :
   * Burn : Ok
   * 5C humans : Needs more data
   * Bant Spirit : Ok
-  
+
+# Dependecies
+
+You need to have the following packages installed in order to have this project work :
+
+ * numpy
+ * Pillow
+ * matplotlib
+ * pandas
+ * sklearn
+ * jupyter
+ 
+You can always install them with pip (type : "pip install NAME_OF_THE_PACKAGE" in your terminal) 
+
+# Run a hand
+
 To run a hand use the following :
 
 ```
@@ -22,6 +37,8 @@ To run a hand use the following :
 from magic import *
 
 #If you want BantSpirit : (type 'Burn' for Burn and 'Humans' for Humans)
+#Moreover if your computer is a bit old, you can try to add : Resolution ='low' to lower the resolution of the cards displayed
+#It would give : mulliganer = Main('BantSpirit',Resolution = 'low')
 mulliganer = Main('BantSpirit')
 
 #Then write the hand you want to test (here it's spirit):
@@ -34,3 +51,4 @@ mulliganer.RunHand(hand)
 # worth noting ! 
 
 The parameter "TrainingSetSize" has been set to 0 in every cell of the notebook in order not to have any picture in the notebook that are extremely heavy in MB. Try 10 to try for instance !
+For the same reason, the RunHand methods have been commented but you can uncomment them to run them and check that everything works correctly !
