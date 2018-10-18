@@ -15,7 +15,7 @@ ETA on the quality of Mulligans :
   * 5C humans : Needs more data
   * Bant Spirit : Ok
 
-# Dependecies
+# Dependencies
 
 You need to have the following packages installed in order to have this project work :
 
