@@ -13,14 +13,12 @@ NAME_CARDS_INDEX = 0
 PREDICTION_INDEX = 0
 NUMBERS_OF_CARDS_IN_HAND_NO_MULLIGAN = 7
 
-DPI_DISPLAY_PREDICTION = 40
-DPI_SHOW_HAND = 50
-FIG_SIZE = (75,75)
-
 class Utility:
 
     def __init__(self):
-        None
+        self.DPI_DISPLAY_PREDICTION = 40
+        self.DPI_SHOW_HAND = 50
+        self.FIG_SIZE = (75,75)
 
     def read(self,path,header=0):
         return np.copy(pd.read_csv(path,sep=';',header=header))
@@ -29,7 +27,12 @@ class Utility:
         plt.figure(figsize=FigSize, dpi= Dpi)
         plt.imshow(Image)
         plt.axis('off')
-        plt.show() 
+        plt.show()
+
+    def LowerResolution(self):
+        self.DPI_DISPLAY_PREDICTION = 4
+        self.DPI_SHOW_HAND = 4
+        self.FIG_SIZE = (200,200)
 
 class Deck:
 
@@ -63,16 +66,22 @@ class ML:
 
 class Main:
 
-    def __init__(self,DeckName,DeckDict={}):
+    def __init__(self,DeckName,DeckDict={},Resolution ='high'):
         CurrentDeck = Deck(DeckName,DeckDict)
         CurrentDeckMLModel = ML(DeckName)
         CurrentDeckMLModel.LoadModel()
+        CurrentResolution = Utility()
+        if Resolution == 'low':
+            CurrentResolution.LowerResolution()
         self.DeckDict = CurrentDeck.DeckDict
         self.DeckList = CurrentDeck.DeckList
         self.CardList = CurrentDeck.CardList
         self.Features = CurrentDeck.Features
         self.DeckName = CurrentDeck.DeckName
         self.ModelML = CurrentDeckMLModel.ModelML
+        self.DPI_SHOW_HAND = CurrentResolution.DPI_SHOW_HAND
+        self.DPI_DISPLAY_PREDICTION = CurrentResolution.DPI_DISPLAY_PREDICTION
+        self.FIG_SIZE = CurrentResolution.FIG_SIZE
 
 
     def _CardsToIndex(self,DeckList):
@@ -180,17 +189,17 @@ class Main:
         Images = [ Image.open(i) for i in ImagesList ]
         MinimumShape = sorted( [(np.sum(i.size), i.size ) for i in Images])[0][1]
         ImagesCombined = np.hstack( (np.asarray( i.resize(MinimumShape) ) for i in Images ) )
-        Utility._DisplayImage(self,ImagesCombined,FIG_SIZE,DPI_SHOW_HAND)
+        Utility._DisplayImage(self,ImagesCombined,self.FIG_SIZE,self.DPI_SHOW_HAND)
         
 
     def _displayPrediction(self,prediction):
         if prediction == 1:
             Img =  Image.open('General/Pictures/Keep.PNG')
-            Utility._DisplayImage(self,Img,FIG_SIZE,DPI_DISPLAY_PREDICTION)
+            Utility._DisplayImage(self,Img,self.FIG_SIZE,self.DPI_DISPLAY_PREDICTION)
 
         if prediction == 0:
             Img =  Image.open('General/Pictures/Mulligan.PNG')
-            Utility._DisplayImage(self,Img,FIG_SIZE,DPI_DISPLAY_PREDICTION)
+            Utility._DisplayImage(self,Img,self.FIG_SIZE,self.DPI_DISPLAY_PREDICTION)
 
     def TestHand(self,HandNames): 
         TestableHand = Main._MakeTestableHand(self,HandNames)
@@ -215,13 +224,19 @@ class Main:
 
 class Train:
 
-    def __init__(self,DeckName,DeckDict):
+    def __init__(self,DeckName,DeckDict,Resolution ='high'):
 
         CurrentDeck = Deck(DeckName,DeckDict)
+        CurrentResolution = Utility()
+        if Resolution == 'low':
+            CurrentResolution.LowerResolution()
         self.DeckName = CurrentDeck.DeckName
         self.DeckList = CurrentDeck.DeckList
         self.CardList = CurrentDeck.CardList
         self.Features = CurrentDeck.Features
+        self.DPI_SHOW_HAND = CurrentResolution.DPI_SHOW_HAND
+        self.DPI_DISPLAY_PREDICTION = CurrentResolution.DPI_DISPLAY_PREDICTION
+        self.FIG_SIZE = CurrentResolution.FIG_SIZE
 
     def MakeTrainingSet(self,n,TrainingSetSize,TrainingFileName):
         pv =';'

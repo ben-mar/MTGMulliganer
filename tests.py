@@ -6,7 +6,11 @@ import magic
 class UtilityTest(unittest.TestCase):
 
     def setUp(self):
+        TestInstanceUtility = magic.Utility()
         self.DeckName = 'Test'
+        self.DPI_DISPLAY_PREDICTION = TestInstanceUtility.DPI_DISPLAY_PREDICTION
+        self.DPI_SHOW_HAND = TestInstanceUtility.DPI_SHOW_HAND
+        self.FIG_SIZE = TestInstanceUtility.FIG_SIZE
     
     def test_Read(self):
         PATH = self.DeckName+'/Training_set_'+self.DeckName+'/Features.csv'
@@ -29,10 +33,14 @@ class UtilityTest(unittest.TestCase):
                     print(type(res[index_i,index_j]),type(READ_CSV[index_i][index_j]))
                     
     def test_displayImage(self):
-        DPI_DISPLAY_PREDICTION = 40
-        FIG_SIZE = (75,75)
         Img =  Image.open('General/Pictures/Mulligan.PNG')
-        magic.Utility._DisplayImage(self,Img,FIG_SIZE,DPI_DISPLAY_PREDICTION) 
+        magic.Utility._DisplayImage(self,Img,self.FIG_SIZE,self.DPI_DISPLAY_PREDICTION)
+
+    def test_LowerResoltution(self):
+        DPI_DISPLAY_PREDICTION = 1
+        DPI_SHOW_HAND = 1
+        magic.Utility.LowerResolution(self)
+        self.assertTrue((self.DPI_SHOW_HAND,self.DPI_DISPLAY_PREDICTION) == (DPI_SHOW_HAND,DPI_DISPLAY_PREDICTION))
 
 class DeckTest(unittest.TestCase):
     """
@@ -103,6 +111,9 @@ class MainTest(unittest.TestCase):
         self.ModelML = TestinstanceML.ModelML
         self.NumbersOfCardsInHandNoMulligan = 7
         self.NumbersOfCardsInHandOneMulligan = 6
+        self.DPI_SHOW_HAND = 50
+        self.DPI_DISPLAY_PREDICTION = 40
+        self.FIG_SIZE = (75,75)
     
     def test_CardToIndex(self):
         DECKLISTNUMBERS = [1,1,3,0,0,0,2,2,2,2]
