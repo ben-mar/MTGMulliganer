@@ -51,3 +51,4 @@ mulliganer.RunHand(hand)
 # worth noting ! 
 
 The parameter "TrainingSetSize" has been set to 0 in every cell of the notebook in order not to have any picture in the notebook that are extremely heavy in MB. Try 10 to try for instance !
+For the same reason, the RunHand methods have been commented but you can uncomment them to run them and check that everything works correctly !
