@@ -1,6 +1,12 @@
 # MTGMulliganer
 Here is the Magic The Gathering Mulliganer, the Machine Learning algorithm that depending on the deck you've selected, tells you if you should keep or Mulligan your hand
 
+# Modelisation 
+
+Each card is represented by a feature vector (that can be found in DECK_NAME/training_set_DECK_NAME/features.csv) and each hand of 7 cards is represented by the concatenation of those features vectors. The label in the training set is 0 if the hand is a Mulligan and 1 if it is a Keep.
+
+This is the input of the Machine Learning model - which is a Random Forest Classifier - and the output is then 0 or 1 (respectively Mulligan and Keep)
+
 Hypothesis : 
 
  * You are on the play
