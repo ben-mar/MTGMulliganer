@@ -71,6 +71,9 @@ class Main:
         CurrentDeckMLModel = ML(DeckName)
         CurrentDeckMLModel.LoadModel()
         CurrentResolution = Utility()
+        if Resolution not in ("low","high"):
+            print("Resolution has to be the str 'low' or the str 'high', here it's : {}".format(Resolution))
+            return
         if Resolution == 'low':
             CurrentResolution.LowerResolution()
         self.DeckDict = CurrentDeck.DeckDict
@@ -228,6 +231,9 @@ class Train:
 
         CurrentDeck = Deck(DeckName,DeckDict)
         CurrentResolution = Utility()
+        if Resolution not in ("low","high"):
+            print("Resolution has to be the str 'low' or the str 'high', here it's : {}".format(Resolution))
+            return
         if Resolution == 'low':
             CurrentResolution.LowerResolution()
         self.DeckName = CurrentDeck.DeckName
@@ -364,19 +370,19 @@ class Train:
         Docs,Labels = Train.TrainingSetToDocs(self,TrainingFileInput)
         Train.WriteTrainingSetFeatureFromDocs(self,Docs,Labels,TrainingFileOutput)
 
-    def TrainAndSaveWeights(self,save=True):
+    def TrainAndSaveWeights(self,Nestimators=100,save=True):
         data = Utility.read(self,self.DeckName+'/Training_set_'+self.DeckName+'/TrainingSet.csv',header = None)
         X, y = data[:,:-1],data[:,-1]
         N_examples = X.shape[0]
         print("N_examples : ",N_examples)
-        MLModel = RandomForestClassifier(n_estimators=100, random_state=0)
+        MLModel = RandomForestClassifier(n_estimators=Nestimators, random_state=0)
         MLModel.fit(X, y)
         print(MLModel.score(X,y))
         self.ModelML = MLModel
         if save:
             joblib.dump(MLModel,self.DeckName+'/Training_set_'+self.DeckName+'/'+self.DeckName+'SavedWeights.pkl')
     
-    def TrainAndTest(self,TestSize=0,TestingFileInput=''):
+    def TrainAndTest(self,Nestimators=100,TestSize=0,TestingFileInput=''):
         data = Utility.read(self,self.DeckName+'/Training_set_'+self.DeckName+'/TrainingSet.csv',header = None)
         X, y = data[:,:-1],data[:,-1]
         print("N_examples : ",X.shape[0])
@@ -390,7 +396,7 @@ class Train:
             X_train,X_test,y_train,y_test = train_test_split(X, y, test_size=TestSize)
             print("N_training examples : ",X_train.shape[0])
             print("N_test examples : ",X_test.shape[0])
-        MLModel = RandomForestClassifier(n_estimators=100, random_state=0)
+        MLModel = RandomForestClassifier(n_estimators=Nestimators, random_state=0)
         MLModel.fit(X_train,y_train)
         print(MLModel.score(X_train,y_train))
         print(MLModel.score(X_test,y_test))

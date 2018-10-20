@@ -37,10 +37,11 @@ class UtilityTest(unittest.TestCase):
         magic.Utility._DisplayImage(self,Img,self.FIG_SIZE,self.DPI_DISPLAY_PREDICTION)
 
     def test_LowerResoltution(self):
-        DPI_DISPLAY_PREDICTION = 1
-        DPI_SHOW_HAND = 1
+        DPI_DISPLAY_PREDICTION = 4
+        DPI_SHOW_HAND = 4
+        FIG_SIZE = (200,200)
         magic.Utility.LowerResolution(self)
-        self.assertTrue((self.DPI_SHOW_HAND,self.DPI_DISPLAY_PREDICTION) == (DPI_SHOW_HAND,DPI_DISPLAY_PREDICTION))
+        self.assertTrue((self.DPI_SHOW_HAND,self.DPI_DISPLAY_PREDICTION,self.FIG_SIZE) == (DPI_SHOW_HAND,DPI_DISPLAY_PREDICTION,FIG_SIZE))
 
 class DeckTest(unittest.TestCase):
     """
