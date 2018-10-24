@@ -20,9 +20,10 @@ class UtilityTest(unittest.TestCase):
                     ['stomping_ground',66,13,14,15,16]]
         vertical_shape = 4
         horizontal_shape = 6            
-        READ_CSV_SHAPE = (vertical_shape,horizontal_shape)       
+        READ_CSV_SHAPE = (vertical_shape,horizontal_shape)
+        HEADER_PRESENT = 0       
 
-        res = magic.Utility.read(self,PATH)
+        res = magic.Utility.read(self,PATH,header = HEADER_PRESENT)
         self.assertEqual(READ_CSV_SHAPE,res.shape)
 
         for index_i in range(vertical_shape):

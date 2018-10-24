@@ -11,6 +11,7 @@ from sklearn.ensemble import RandomForestClassifier
 NUMERIC_FEATURE_SPLIT = 1
 NAME_CARDS_INDEX = 0
 PREDICTION_INDEX = 0
+HEADER_PRESENT = 0
 NUMBERS_OF_CARDS_IN_HAND_NO_MULLIGAN = 7
 
 class Utility:
@@ -20,7 +21,10 @@ class Utility:
         self.DPI_SHOW_HAND = 50
         self.FIG_SIZE = (75,75)
 
-    def read(self,path,header=0):
+    def read(self,path,header=HEADER_PRESENT):
+        """
+        header = HEADER_PRESENT means that there is a header, put header = None if there is no header
+        """
         return np.copy(pd.read_csv(path,sep=';',header=header))
     
     def _DisplayImage(self,Image,FigSize,Dpi):
@@ -371,10 +375,12 @@ class Train:
         Train.WriteTrainingSetFeatureFromDocs(self,Docs,Labels,TrainingFileOutput)
 
     def TrainAndSaveWeights(self,Nestimators=100,save=True):
-        data = Utility.read(self,self.DeckName+'/Training_set_'+self.DeckName+'/TrainingSet.csv',header = None)
-        X, y = data[:,:-1],data[:,-1]
+        Data = Utility.read(self,self.DeckName+'/Training_set_'+self.DeckName+'/TrainingSet.csv',header = None)
+        X, y = Data[:,:-1],Data[:,-1]
         N_examples = X.shape[0]
+        N_features = X.shape[1]
         print("N_examples : ",N_examples)
+        print("N_features : ",N_features)
         MLModel = RandomForestClassifier(n_estimators=Nestimators, random_state=0)
         MLModel.fit(X, y)
         print(MLModel.score(X,y))
@@ -383,8 +389,8 @@ class Train:
             joblib.dump(MLModel,self.DeckName+'/Training_set_'+self.DeckName+'/'+self.DeckName+'SavedWeights.pkl')
     
     def TrainAndTest(self,Nestimators=100,TestSize=0,TestingFileInput=''):
-        data = Utility.read(self,self.DeckName+'/Training_set_'+self.DeckName+'/TrainingSet.csv',header = None)
-        X, y = data[:,:-1],data[:,-1]
+        Data = Utility.read(self,self.DeckName+'/Training_set_'+self.DeckName+'/TrainingSet.csv',header = None)
+        X, y = Data[:,:-1],Data[:,-1]
         print("N_examples : ",X.shape[0])
         if TestSize==0: 
             TestData = Utility.read(self,self.DeckName+'/Training_set_'+self.DeckName+'/'+TestingFileInput+'.csv',header = None)
