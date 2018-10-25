@@ -60,6 +60,7 @@ class DeckTest(unittest.TestCase):
         self.DeckDict = TestinstanceDeck.DeckDict
         self.DeckList = TestinstanceDeck.DeckList
         self.CardList = TestinstanceDeck.CardList
+        self._FeaturesShape = TestinstanceDeck._FeaturesShape
 
     def test_features(self):
         FEATURES = np.array([[0,1,2,3,4],
@@ -67,6 +68,11 @@ class DeckTest(unittest.TestCase):
                             [87,9,10,11,12],
                             [66,13,14,15,16]])
         self.assertTrue((self.features==FEATURES).all())
+
+    def test_featuresShape(self):
+        FEATURES_SHAPE = (4,5)
+        self.assertTupleEqual(self._FeaturesShape,FEATURES_SHAPE)
+
 
     def test_decklist(self):
         DECKLIST = ['wooded_foothills','wooded_foothills','stomping_ground','sacred_foundry','sacred_foundry','sacred_foundry',

@@ -44,6 +44,7 @@ class Deck:
         self.DeckDict = DeckDict
         self.DeckName = DeckName
         self.Features = Utility.read(self,self.DeckName+'/Training_set_'+self.DeckName+'/Features.csv')[:,NUMERIC_FEATURE_SPLIT:]
+        self._FeaturesShape = self.Features.shape
         self.DeckList = Deck._decklist(self)
         self.CardList = Deck._cardlist(self) 
 
@@ -248,6 +249,29 @@ class Train:
         self.DPI_DISPLAY_PREDICTION = CurrentResolution.DPI_DISPLAY_PREDICTION
         self.FIG_SIZE = CurrentResolution.FIG_SIZE
 
+    def MyScore(self,TestingFileInput='TestingSet'):
+        CurrentDeckMLModel = ML(self.DeckName)
+        CurrentDeckMLModel.LoadModel()
+        self.ModelML = CurrentDeckMLModel.ModelML
+        FailedHands = []
+        TestDataNames = Utility.read(self,self.DeckName+'/Training_set_'+self.DeckName+'/'+TestingFileInput+'Names.csv',header=None)
+        TestData = Utility.read(self,self.DeckName+'/Training_set_'+self.DeckName+'/'+TestingFileInput+'.csv',header=None)
+        X_test_names = TestDataNames[:,:-1]
+        X_test, y_test = TestData[:,:-1],TestData[:,-1]
+        N_test_examples = X_test.shape[0]
+        print("N_test examples : ",N_test_examples)
+        for i in range(N_test_examples) :
+            TestableHand = X_test[i].reshape(1, -1)
+            prediction = self.ModelML.predict(TestableHand)[PREDICTION_INDEX]
+            if prediction != y_test[i]:
+                FailedHands.append(" ".join(X_test_names[i]))
+        PercentageScore = 100*(1-(len(FailedHands)/N_test_examples))
+        print("Score is : {} %".format(PercentageScore))
+        return FailedHands
+                
+                
+
+
     def MakeTrainingSet(self,n,TrainingSetSize,TrainingFileName):
         pv =';'
         with open(self.DeckName+'/Training_set_'+self.DeckName+'/'+TrainingFileName+'.csv' , 'a+') as TrainingFile,\
@@ -388,7 +412,27 @@ class Train:
         if save:
             joblib.dump(MLModel,self.DeckName+'/Training_set_'+self.DeckName+'/'+self.DeckName+'SavedWeights.pkl')
     
-    def TrainAndTest(self,Nestimators=100,TestSize=0,TestingFileInput=''):
+    def FindBestNestimator(self,X_train,y_train,X_test,y_test,N0=50):
+        increment = 5
+        InitialNestimator = N0
+        FinalNestimator = 200
+        ListNestimator = []
+        ListScore = []
+        for i in range((FinalNestimator-InitialNestimator)//increment):
+            Nestimators = InitialNestimator + increment*i
+            MLModel = RandomForestClassifier(n_estimators=Nestimators, random_state=0)
+            MLModel.fit(X_train,y_train)
+            Score = MLModel.score(X_test,y_test)
+            ListNestimator.append(Nestimators)
+            ListScore.append(Score)
+        BestScore = np.max(ListScore) 
+        BestScoreIndex = ListScore.index(BestScore)
+        BestNestimator = ListNestimator[BestScoreIndex]
+        print("Best Score found : {} , Best N_estimators found : {} ".format(BestScore ,BestNestimator))
+        return BestNestimator
+
+
+    def TrainAndTest(self,Nestimators=100,FindBestNestimators=True,TestSize=0,TestingFileInput=''):
         Data = Utility.read(self,self.DeckName+'/Training_set_'+self.DeckName+'/TrainingSet.csv',header = None)
         X, y = Data[:,:-1],Data[:,-1]
         print("N_examples : ",X.shape[0])
@@ -402,7 +446,57 @@ class Train:
             X_train,X_test,y_train,y_test = train_test_split(X, y, test_size=TestSize)
             print("N_training examples : ",X_train.shape[0])
             print("N_test examples : ",X_test.shape[0])
+        if FindBestNestimators:
+            Nestimators = Train.FindBestNestimator(self,X_train,y_train,X_test,y_test)
         MLModel = RandomForestClassifier(n_estimators=Nestimators, random_state=0)
         MLModel.fit(X_train,y_train)
         print(MLModel.score(X_train,y_train))
         print(MLModel.score(X_test,y_test))
+
+class Analyse:
+
+        def __init__(self,DeckName,DeckDict={}):
+
+            CurrentDeck = Deck(DeckName,DeckDict)
+            CurrentDeckMLModel = ML(DeckName)
+            CurrentDeckMLModel.LoadModel()
+
+            self.DeckDict = CurrentDeck.DeckDict
+            self.DeckList = CurrentDeck.DeckList
+            self.CardList = CurrentDeck.CardList
+            self.Features = CurrentDeck.Features
+            self._FeatureShape = CurrentDeck._FeaturesShape
+            self.DeckName = CurrentDeck.DeckName
+            self.ModelML = CurrentDeckMLModel.ModelML
+
+        def AnalysePattern(self):
+            self.ImportanceFeature = list(self.ModelML.feature_importances_)
+            ImportanceFeatureSorted = list(self.ModelML.feature_importances_)
+            ImportanceFeatureSorted.sort(reverse=True)
+
+            NumberOfFeaturesPerCardIndex = 1
+            FeaturesNameRaw = 1
+            FeaturesNameLignIndex = 0
+
+            NumberOfFeaturesPerCard = self.Features.shape[NumberOfFeaturesPerCardIndex]
+            FeatureNames = Utility.read(self,self.DeckName+'/Training_set_'+self.DeckName+'/Features.csv',header = None)[FeaturesNameLignIndex]
+            FeatureNames = FeatureNames[FeaturesNameRaw:]
+
+            if len(self.ImportanceFeature)!=NumberOfFeaturesPerCard*NUMBERS_OF_CARDS_IN_HAND_NO_MULLIGAN:
+                ErrorSentence = """Error in the Number of Features ! The model has {} features per hand and the loaded
+                                   features.csv has {}*{} = {} features per hand"""
+                print(ErrorSentence.format(len(self.ImportanceFeature),NUMBERS_OF_CARDS_IN_HAND_NO_MULLIGAN,
+                NumberOfFeaturesPerCard,NumberOfFeaturesPerCard*NUMBERS_OF_CARDS_IN_HAND_NO_MULLIGAN))
+                return
+
+            count = 1
+            for ImportanceOfFeature in ImportanceFeatureSorted:
+                FeatureIndex = self.ImportanceFeature.index(ImportanceOfFeature)
+                NumberOfFeature = FeatureIndex % NumberOfFeaturesPerCard 
+                NumberOfCard =  FeatureIndex // NumberOfFeaturesPerCard + 1
+                Feature = FeatureNames[NumberOfFeature]
+                ResultSentence = """The N°{} feature is the feature : "{}" of the card N°{}  with the score of {} percents """
+                print(ResultSentence.format(count,Feature,NumberOfCard,np.around(100*ImportanceOfFeature,decimals=2)))
+                count += 1
+                if count > 10 :
+                    break
