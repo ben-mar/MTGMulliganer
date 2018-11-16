@@ -131,7 +131,7 @@ class Main:
         len_nList = len(nList)
 
         if len(self.DeckList) ==0:
-            print('Error, DeckList is empty, perhaps DeckDict has been forgotten ?')
+            print('Error, DeckList is empty, perhaps DeckDict has been forgotten in Main ?')
             return
         if len_DictList == 0:
             print('Error, DictList is empty, you need to give to this method a List of dictionnaries !')
@@ -266,11 +266,9 @@ class Train:
             if prediction != y_test[i]:
                 FailedHands.append(" ".join(X_test_names[i]))
         PercentageScore = 100*(1-(len(FailedHands)/N_test_examples))
-        print("Score is : {} %".format(PercentageScore))
+        print("Score is : {} % \n".format(np.around(PercentageScore,decimals = 2)))
         return FailedHands
                 
-                
-
 
     def MakeTrainingSet(self,n,TrainingSetSize,TrainingFileName):
         pv =';'
@@ -333,7 +331,6 @@ class Train:
         - n represents the number of cards you want in your hand.
         - DictList represents the list of python dictionnaries you want to create your hand with.
         - nList represents the list of number of cards (integers) you want to pick from each dictionnary in DictList, respectively.
-
         """
 
         CurrentDeckMLModel = ML(self.DeckName)
@@ -418,6 +415,7 @@ class Train:
         FinalNestimator = 200
         ListNestimator = []
         ListScore = []
+        print("Finding the best N_estimators ...")
         for i in range((FinalNestimator-InitialNestimator)//increment):
             Nestimators = InitialNestimator + increment*i
             MLModel = RandomForestClassifier(n_estimators=Nestimators, random_state=0)
@@ -428,7 +426,7 @@ class Train:
         BestScore = np.max(ListScore) 
         BestScoreIndex = ListScore.index(BestScore)
         BestNestimator = ListNestimator[BestScoreIndex]
-        print("Best Score found : {} , Best N_estimators found : {} ".format(BestScore ,BestNestimator))
+        print("Best Score found : {} , Best N_estimators found : {} \n".format(np.around(BestScore,decimals=4) ,BestNestimator))
         return BestNestimator
 
 
@@ -440,18 +438,18 @@ class Train:
             TestData = Utility.read(self,self.DeckName+'/Training_set_'+self.DeckName+'/'+TestingFileInput+'.csv',header = None)
             X_test, y_test = TestData[:,:-1],TestData[:,-1]
             X_train, y_train = X, y
-            print("N_training examples : ",X_train.shape[0])
-            print("N_test examples : ",X_test.shape[0])
+            print("N_training examples : {}".format(X_train.shape[0]))
+            print("N_test examples : {} \n".format(X_test.shape[0]))
         elif TestingFileInput == '':
             X_train,X_test,y_train,y_test = train_test_split(X, y, test_size=TestSize)
-            print("N_training examples : ",X_train.shape[0])
-            print("N_test examples : ",X_test.shape[0])
+            print("N_training examples : {} ".format(X_train.shape[0]))
+            print("N_test examples : {} \n".format(X_test.shape[0]))
         if FindBestNestimators:
             Nestimators = Train.FindBestNestimator(self,X_train,y_train,X_test,y_test)
         MLModel = RandomForestClassifier(n_estimators=Nestimators, random_state=0)
         MLModel.fit(X_train,y_train)
-        print(MLModel.score(X_train,y_train))
-        print(MLModel.score(X_test,y_test))
+        print("Training Score : {} ".format(np.around(MLModel.score(X_train,y_train),decimals = 4)))
+        print("Testing Score : {} \n".format(np.around(MLModel.score(X_test,y_test),decimals = 4)))
 
 class Analyse:
 

@@ -228,6 +228,7 @@ class MainTest(unittest.TestCase):
         DictList=[DictMountain,DictSacredFoundry]
         n_list = [3,4]
         magic.Main.TestModel(self,N,DictList,n_list)
+        magic.Main.TestModel(self,N)
 
 class TrainTest(unittest.TestCase):
 
