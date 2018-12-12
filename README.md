@@ -19,7 +19,7 @@ ETA on the quality of Mulligans :
 
   * Burn : Ok
   * 5C humans : Needs more data
-  * Bant Spirit : Ok
+  * Bant Spirit : Ok (93% on training set / 91% on testing set)
 
 # Dependencies
 
