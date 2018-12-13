@@ -1,18 +1,18 @@
- name_of_the_card;index;CCM;type_of_card;Color produced (if land);Color needed (if not land)
-inspiring_vantage;0;0;0;2;0
-sacred_foundry;1;0;0;2;0
-bloodstained_mire;2;0;0;2;0
-wooded_foothills;3;0;0;2;0
-arid_mesa;4;0;0;2;0
-mountain;5;0;0;1;0
-stomping_ground;6;0;0;1;0
-monastery_swiftspear;7;1;1;0;1
-goblin_guide;8;1;1;0;1
-rift_bolt;9;1;2;0;1
-lava_spike;10;1;2;0;1
-lightning_bolt;11;1;2;0;1
-searing_blaze;12;2;2;0;1
-eidolon_of_the_great_revel;13;2;1;0;1
-lightning_helix;14;2;2;0;2
-skullcrack;15;2;2;0;1
-boros_charm;16;2;2;0;2
+ name_of_the_card;CCM;type_of_card;Color produced (if land);Color needed (if not land);Damage
+inspiring_vantage;0;0;2;0;0
+sacred_foundry;0;0;2;0;0
+bloodstained_mire;0;0;2;0;0
+wooded_foothills;0;0;2;0;0
+arid_mesa;0;0;2;0;0
+mountain;0;0;1;0;0
+stomping_ground;0;0;1;0;0
+monastery_swiftspear;1;1;0;1;1
+goblin_guide;1;1;0;1;2
+rift_bolt;1;2;0;1;3
+lava_spike;1;2;0;1;3
+lightning_bolt;1;2;0;1;3
+searing_blaze;2;2;0;1;3
+eidolon_of_the_great_revel;2;1;0;1;2
+lightning_helix;2;2;0;2;3
+skullcrack;2;2;0;1;3
+boros_charm;2;2;0;2;4

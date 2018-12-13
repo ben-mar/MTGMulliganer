@@ -13,6 +13,7 @@ NAME_CARDS_INDEX = 0
 PREDICTION_INDEX = 0
 HEADER_PRESENT = 0
 NUMBERS_OF_CARDS_IN_HAND_NO_MULLIGAN = 7
+LIST_OF_MARKERS_PLT = ['-','--','-.',':']
 
 class Utility:
 
@@ -395,42 +396,53 @@ class Train:
         Docs,Labels = Train.TrainingSetToDocs(self,TrainingFileInput)
         Train.WriteTrainingSetFeatureFromDocs(self,Docs,Labels,TrainingFileOutput)
 
-    def TrainAndSaveWeights(self,Nestimators=100,save=True):
+    def TrainAndSaveWeights(self,Nestimators=100,MaxDepth=None,save=True):
         Data = Utility.read(self,self.DeckName+'/Training_set_'+self.DeckName+'/TrainingSet.csv',header = None)
         X, y = Data[:,:-1],Data[:,-1]
         N_examples = X.shape[0]
         N_features = X.shape[1]
         print("N_examples : ",N_examples)
         print("N_features : ",N_features)
-        MLModel = RandomForestClassifier(n_estimators=Nestimators, random_state=0)
+        MLModel = RandomForestClassifier(n_estimators=Nestimators,max_depth=MaxDepth, random_state=0)
         MLModel.fit(X, y)
         print(MLModel.score(X,y))
         self.ModelML = MLModel
         if save:
             joblib.dump(MLModel,self.DeckName+'/Training_set_'+self.DeckName+'/'+self.DeckName+'SavedWeights.pkl')
     
-    def FindBestNestimator(self,X_train,y_train,X_test,y_test,N0=50):
+    def FindBestNestimator(self,X_train,y_train,X_test,y_test,MaxDepth,N0=30,NestimatorsList=[]):
         increment = 5
         InitialNestimator = N0
-        FinalNestimator = 200
-        ListNestimator = []
-        ListScore = []
+        FinalNestimator = 300
+        ListNestimator,ListScore,ListFit = [], [], []
         print("Finding the best N_estimators ...")
-        for i in range((FinalNestimator-InitialNestimator)//increment):
-            Nestimators = InitialNestimator + increment*i
-            MLModel = RandomForestClassifier(n_estimators=Nestimators, random_state=0)
-            MLModel.fit(X_train,y_train)
-            Score = MLModel.score(X_test,y_test)
-            ListNestimator.append(Nestimators)
-            ListScore.append(Score)
+        if NestimatorsList == []:
+            for i in range((FinalNestimator-InitialNestimator)//increment):
+                Nestimators = InitialNestimator + increment*i
+                MLModel = RandomForestClassifier(n_estimators = Nestimators, max_depth = MaxDepth,  random_state=0)
+                MLModel.fit(X_train,y_train)
+                Score = MLModel.score(X_test,y_test)
+                fit = MLModel.score(X_train,y_train)
+                ListFit.append(fit)
+                ListNestimator.append(Nestimators)
+                ListScore.append(Score)
+        else :
+            for Nestimators in NestimatorsList:
+                MLModel = RandomForestClassifier(n_estimators = Nestimators, max_depth = MaxDepth,  random_state=0)
+                MLModel.fit(X_train,y_train)
+                Score = MLModel.score(X_test,y_test)
+                fit = MLModel.score(X_train,y_train)
+                ListFit.append(fit)
+                ListNestimator.append(Nestimators)
+                ListScore.append(Score)
         BestScore = np.max(ListScore) 
         BestScoreIndex = ListScore.index(BestScore)
         BestNestimator = ListNestimator[BestScoreIndex]
         print("Best Score found : {} , Best N_estimators found : {} \n".format(np.around(BestScore,decimals=4) ,BestNestimator))
-        return BestNestimator
+        return BestNestimator, ListNestimator, ListScore , ListFit
 
 
-    def TrainAndTest(self,Nestimators=100,FindBestNestimators=True,TestSize=0,TestingFileInput=''):
+    def TrainAndTest(self,Nestimators=100,FindBestNestimators=True,NestimatorsList = [],TestSize=0,MaxDepth=None,TestingFileInput=''):
         Data = Utility.read(self,self.DeckName+'/Training_set_'+self.DeckName+'/TrainingSet.csv',header = None)
         X, y = Data[:,:-1],Data[:,-1]
         print("N_examples : ",X.shape[0])
@@ -445,56 +457,105 @@ class Train:
             print("N_training examples : {} ".format(X_train.shape[0]))
             print("N_test examples : {} \n".format(X_test.shape[0]))
         if FindBestNestimators:
-            Nestimators = Train.FindBestNestimator(self,X_train,y_train,X_test,y_test)
-        MLModel = RandomForestClassifier(n_estimators=Nestimators, random_state=0)
+            Nestimators, ListNestimator, ListScore, ListFit \
+            = Train.FindBestNestimator(self,X_train,y_train,X_test,y_test,MaxDepth=MaxDepth , NestimatorsList = NestimatorsList)
+        MLModel = RandomForestClassifier(n_estimators=Nestimators, max_depth = MaxDepth, random_state=0)
         MLModel.fit(X_train,y_train)
         print("Training Score : {} ".format(np.around(MLModel.score(X_train,y_train),decimals = 4)))
         print("Testing Score : {} \n".format(np.around(MLModel.score(X_test,y_test),decimals = 4)))
+        if FindBestNestimators: 
+            return ListNestimator, ListScore, ListFit
+        
 
 class Analyse:
 
-        def __init__(self,DeckName,DeckDict={}):
+    def __init__(self,DeckName,DeckDict={}):
 
-            CurrentDeck = Deck(DeckName,DeckDict)
-            CurrentDeckMLModel = ML(DeckName)
-            CurrentDeckMLModel.LoadModel()
+        CurrentDeck = Deck(DeckName,DeckDict)
+        CurrentDeckMLModel = ML(DeckName)
+        CurrentDeckMLModel.LoadModel()
 
-            self.DeckDict = CurrentDeck.DeckDict
-            self.DeckList = CurrentDeck.DeckList
-            self.CardList = CurrentDeck.CardList
-            self.Features = CurrentDeck.Features
-            self._FeatureShape = CurrentDeck._FeaturesShape
-            self.DeckName = CurrentDeck.DeckName
-            self.ModelML = CurrentDeckMLModel.ModelML
+        self.DeckDict = CurrentDeck.DeckDict
+        self.DeckList = CurrentDeck.DeckList
+        self.CardList = CurrentDeck.CardList
+        self.Features = CurrentDeck.Features
+        self._FeatureShape = CurrentDeck._FeaturesShape
+        self.DeckName = CurrentDeck.DeckName
+        self.ModelML = CurrentDeckMLModel.ModelML
 
-        def AnalysePattern(self):
-            self.ImportanceFeature = list(self.ModelML.feature_importances_)
-            ImportanceFeatureSorted = list(self.ModelML.feature_importances_)
-            ImportanceFeatureSorted.sort(reverse=True)
+    def AnalysePattern(self):
+        self.ImportanceFeature = list(self.ModelML.feature_importances_)
+        ImportanceFeatureSorted = list(self.ModelML.feature_importances_)
+        ImportanceFeatureSorted.sort(reverse=True)
 
-            NumberOfFeaturesPerCardIndex = 1
-            FeaturesNameRaw = 1
-            FeaturesNameLignIndex = 0
+        NumberOfFeaturesPerCardIndex = 1
+        FeaturesNameRaw = 1
+        FeaturesNameLignIndex = 0
 
-            NumberOfFeaturesPerCard = self.Features.shape[NumberOfFeaturesPerCardIndex]
-            FeatureNames = Utility.read(self,self.DeckName+'/Training_set_'+self.DeckName+'/Features.csv',header = None)[FeaturesNameLignIndex]
-            FeatureNames = FeatureNames[FeaturesNameRaw:]
+        NumberOfFeaturesPerCard = self.Features.shape[NumberOfFeaturesPerCardIndex]
+        FeatureNames = Utility.read(self,self.DeckName+'/Training_set_'+self.DeckName+'/Features.csv',header = None)[FeaturesNameLignIndex]
+        FeatureNames = FeatureNames[FeaturesNameRaw:]
 
-            if len(self.ImportanceFeature)!=NumberOfFeaturesPerCard*NUMBERS_OF_CARDS_IN_HAND_NO_MULLIGAN:
-                ErrorSentence = """Error in the Number of Features ! The model has {} features per hand and the loaded
-                                   features.csv has {}*{} = {} features per hand"""
-                print(ErrorSentence.format(len(self.ImportanceFeature),NUMBERS_OF_CARDS_IN_HAND_NO_MULLIGAN,
-                NumberOfFeaturesPerCard,NumberOfFeaturesPerCard*NUMBERS_OF_CARDS_IN_HAND_NO_MULLIGAN))
-                return
+        if len(self.ImportanceFeature)!=NumberOfFeaturesPerCard*NUMBERS_OF_CARDS_IN_HAND_NO_MULLIGAN:
+            ErrorSentence = """Error in the Number of Features ! The model has {} features per hand and the loaded
+                                features.csv has {}*{} = {} features per hand"""
+            print(ErrorSentence.format(len(self.ImportanceFeature),NUMBERS_OF_CARDS_IN_HAND_NO_MULLIGAN,
+            NumberOfFeaturesPerCard,NumberOfFeaturesPerCard*NUMBERS_OF_CARDS_IN_HAND_NO_MULLIGAN))
+            return
 
-            count = 1
-            for ImportanceOfFeature in ImportanceFeatureSorted:
-                FeatureIndex = self.ImportanceFeature.index(ImportanceOfFeature)
-                NumberOfFeature = FeatureIndex % NumberOfFeaturesPerCard 
-                NumberOfCard =  FeatureIndex // NumberOfFeaturesPerCard + 1
-                Feature = FeatureNames[NumberOfFeature]
-                ResultSentence = """The N°{} feature is the feature : "{}" of the card N°{}  with the score of {} percents """
-                print(ResultSentence.format(count,Feature,NumberOfCard,np.around(100*ImportanceOfFeature,decimals=2)))
-                count += 1
-                if count > 10 :
-                    break
+        count = 1
+        for ImportanceOfFeature in ImportanceFeatureSorted:
+            FeatureIndex = self.ImportanceFeature.index(ImportanceOfFeature)
+            NumberOfFeature = FeatureIndex % NumberOfFeaturesPerCard 
+            NumberOfCard =  FeatureIndex // NumberOfFeaturesPerCard + 1
+            Feature = FeatureNames[NumberOfFeature]
+            ResultSentence = """The N°{} feature is the feature : "{}" of the card N°{}  with the score of {} percents """
+            print(ResultSentence.format(count,Feature,NumberOfCard,np.around(100*ImportanceOfFeature,decimals=2)))
+            count += 1
+            if count > 10 :
+                break
+
+    def PlotGraphs(self,MaxDepthList,TestSizeList,NestimatorsList, Nexperiments = 50):
+        
+        Results_testing = np.zeros((Nexperiments,len(MaxDepthList),len(NestimatorsList)))
+        Results_training = np.zeros((Nexperiments,len(MaxDepthList),len(NestimatorsList)))
+        for _,TestSize in enumerate(TestSizeList):
+            for MaxDepth_idx, MaxDepth in enumerate(MaxDepthList):
+                for count in range(Nexperiments):
+                    _, ListScore, ListFit \
+                        = Train.TrainAndTest(self,FindBestNestimators=True,NestimatorsList = NestimatorsList,MaxDepth = MaxDepth,TestSize=TestSize)
+                    
+                    Results_testing[count,MaxDepth_idx,:] = ListScore
+                    Results_training[count,MaxDepth_idx,:] = ListFit
+
+                    print('{} / {}'.format(count+1 + MaxDepth_idx*Nexperiments ,Nexperiments*len(MaxDepthList)))
+
+
+        Results_testing_avg = np.mean(Results_testing,axis = 0)
+        Results_training_avg = np.mean(Results_training,axis = 0)
+
+        Legend = []
+        for count in range(len(MaxDepthList)):
+            Marker = LIST_OF_MARKERS_PLT[count % len(LIST_OF_MARKERS_PLT)]
+
+            plt.plot(NestimatorsList,Results_testing_avg[count,:],'r'+ Marker ,
+                NestimatorsList,Results_training_avg[count,:],'b'+ Marker)
+            Legend.append('Testing score / MaxDepth ='+str(MaxDepthList[count]))
+            Legend.append('Training score / MaxDepth ='+str(MaxDepthList[count]))
+        plt.legend(Legend,shadow=True, loc=(1, 0.7), handlelength=1.5, fontsize=16)
+        plt.xlabel('N_estimators')
+        plt.ylabel('Score in %')
+        plt.show()
+
+        Legend = []
+        for count in range(len(NestimatorsList)):
+            Marker = LIST_OF_MARKERS_PLT[count % len(LIST_OF_MARKERS_PLT)]
+
+            plt.plot(MaxDepthList,Results_testing_avg[:,count],'r'+ Marker ,
+                MaxDepthList,Results_training_avg[:,count],'b'+ Marker)
+            Legend.append('Testing score / N_estimators ='+str(NestimatorsList[count]))
+            Legend.append('Training score / N_estimators ='+str(NestimatorsList[count]))
+        plt.legend(Legend,shadow=True, loc=(1, 0.7), handlelength=1.5, fontsize=16)
+        plt.xlabel('Max Depth')
+        plt.ylabel('Score in %')
+        plt.show() 
