@@ -17,8 +17,8 @@ For Now only the Modern Boros Burn Deck, the Modern 5C Humans Deck and the Moder
 
 ETA on the quality of Mulligans :
 
-  * Burn : Ok
-  * 5C humans : Needs more data
+  * Burn : Ok (98.3 on training set / 94% on testing set)
+  * 5C humans : Needs more data : Bias on the current data (98% on training set / 92% on testing set)
   * Bant Spirit : Ok (93% on training set / 91% on testing set)
 
 # Dependencies
