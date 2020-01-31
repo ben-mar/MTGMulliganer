@@ -3,7 +3,8 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import unittest
 from PIL import Image
-from sklearn.externals import joblib
+#from sklearn.externals import joblib
+import joblib
 from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestClassifier
 
@@ -17,111 +18,272 @@ LIST_OF_MARKERS_PLT = ['-','--','-.',':']
 
 class Utility:
 
-    def __init__(self):
+    def __init__(self) -> None:
+
+        """
+
+        Utility class is a tool class to : 
+
+        * read the data files using pandas
+        * display cards images using matplotlib : TODO update this function
+        * Lower the resolution of the images in case the display is taking too much time.
+
+        
+
+        """
+
         self.DPI_DISPLAY_PREDICTION = 40
         self.DPI_SHOW_HAND = 50
         self.FIG_SIZE = (75,75)
 
-    def read(self,path,header=HEADER_PRESENT):
+
+    def read(self,
+             path: str,
+             header: int = HEADER_PRESENT
+             ) -> np.array:
+
         """
+        TODO : the header is NOT ALWAYS an int and should be always the same variable type
+        Function reading the excel data files (TODO precise this in the function name)
+
+        Parameters
+        ----------
+        path
+            path to the excel file to be read 
+
         header = HEADER_PRESENT means that there is a header, put header = None if there is no header
         """
         return np.copy(pd.read_csv(path,sep=';',header=header))
     
-    def _DisplayImage(self,Image,FigSize,Dpi):
-        plt.figure(figsize=FigSize, dpi= Dpi)
+    def _DisplayImage(self,
+                      Image: np.hstack,
+                      FigSize: (int,int),
+                      Dpi: int
+                      ) -> None:
+        """
+        TODO : WRITE THE IMAGE TYPE the Image is a h.stack type, no Idea exactly what it is and it should be more clear
+        Function displaying images (stack Images or jpg ? uses which module to read the images ? plt)
+
+        Parameters
+        ----------
+        Image
+            Image to be displayed
+        FigSize 
+            Size of the figure/image, TODO check what it is exactly
+        Dpi 
+            dpi of the image to be displayed
+
+        """                      
+        plt.figure(figsize = FigSize, dpi = Dpi)
         plt.imshow(Image)
         plt.axis('off')
         plt.show()
 
-    def LowerResolution(self):
+    def LowerResolution(self) -> None:
+        """
+        Functions that reduces the constant variables used for displaying images in case the display is too long
+        """
+
         self.DPI_DISPLAY_PREDICTION = 4
         self.DPI_SHOW_HAND = 4
         self.FIG_SIZE = (200,200)
 
 class Deck:
 
-    def __init__(self,DeckName,DeckDict = {}):
+    def __init__(self,
+                 DeckName: str,
+                 DeckDict: dict = {str : int},
+                 ) -> None:
+
+        """
+        Initialisation of the class Deck 
+
+        Parameters
+        ----------
+        DeckName
+            The name of the deck
+        DeckDict
+            The dictionary corresponding to the cards inside the deck and their number.
+            The keys of the dictionnary are the cards written as str, and the corresponding values are their number.
+        """
+
+        
         self.DeckDict = DeckDict
         self.DeckName = DeckName
-        self.Features = Utility.read(self,self.DeckName+'/Training_set_'+self.DeckName+'/Features.csv')[:,NUMERIC_FEATURE_SPLIT:]
+
+        # Looks for the features excel sheet of each card.
+        self.PathToFeatures: str = self.DeckName+'/Training_set_'+self.DeckName+'/Features.csv'
+        self.Features: np.array = Utility.read(self,self.PathToFeatures)[:,NUMERIC_FEATURE_SPLIT:]
         self._FeaturesShape = self.Features.shape
+
+        # calls the function _decklist
         self.DeckList = Deck._decklist(self)
+
+        # calls the function _cardlist
         self.CardList = Deck._cardlist(self) 
 
-    def _decklist(self):
-        DeckList = []
+    def _decklist(self) -> list:
+
+        """
+        _decklist function returns a list of all the cards (str) of the deck containing all the cards including duplicates cards.
+
+        """
+
+        DeckList: list = []
         Cards = self.DeckDict.items()
-        for Card,NumberOfCopy in Cards:
+        for Card, NumberOfCopy in Cards:
             for _ in range(NumberOfCopy):
                 DeckList.append(Card)
         return DeckList
 
-    def _cardlist(self):
-        CardList = Utility.read(self,self.DeckName+'/Training_set_'+self.DeckName+'/Features.csv')[:,NAME_CARDS_INDEX]
+    def _cardlist(self) -> list:
+
+        """
+        _cardlist function returns a list of all the cards (str) containing all the cards of the feature excel sheet without duplicates.
+
+        """
+        CardList = Utility.read(self,self.PathToFeatures)[:,NAME_CARDS_INDEX]
         CardList = list(CardList)
         return CardList
 
 class ML:
 
-    def __init__(self,DeckName):
-        self.DeckName = DeckName
+    def __init__(self,
+                 DeckName: str,
+                 ) -> None:
+        """
+        Initialisation of the class ML (Machine Learning) 
+
+        Parameters
+        ----------
+        DeckName
+            The name of the deck, it must be the same than for the class deck in order to load the correct model
+        """                                                   
+        self.DeckName: str = DeckName
     
-    def LoadModel(self):
-        self.ModelML = joblib.load(self.DeckName+'/Training_set_'+self.DeckName+'/'+self.DeckName+'SavedWeights.pkl')
+    def LoadModel(self)-> None:
+        self.PathToSavedWeights: str = self.DeckName+'/Training_set_'+self.DeckName+'/'+self.DeckName+'SavedWeights.pkl'
+        self.ModelML = joblib.load(self.PathToSavedWeights)
 
 class Main:
 
-    def __init__(self,DeckName,DeckDict={},Resolution ='high'):
+    def __init__(self,
+                 DeckName: str,
+                 DeckDict: dict = {str : int},
+                 Resolution: str ='high'
+                 ) -> None:
+        """
+        Initialisation of the class Main 
+
+        Parameters
+        ----------
+        DeckName
+            The name of the deck, it must be the same than for the class deck in order to load the correct model
+        DeckDict
+            The dictionary corresponding to the cards inside the deck and their number.
+            The keys of the dictionnary are the cards written as str, and the corresponding values are their number.
+        Resolution
+            the resolution of the cards displayed, "high" by default and can be changed to "low"
+        """    
+        # Creates an instance of Deck class
         CurrentDeck = Deck(DeckName,DeckDict)
+
+        # Creates an instance of ML class
         CurrentDeckMLModel = ML(DeckName)
         CurrentDeckMLModel.LoadModel()
+
+        # Creates an instance of the Utility class
         CurrentResolution = Utility()
         if Resolution not in ("low","high"):
             print("Resolution has to be the str 'low' or the str 'high', here it's : {}".format(Resolution))
             return
         if Resolution == 'low':
             CurrentResolution.LowerResolution()
+        
+        # Stores all the Current deck attributes
         self.DeckDict = CurrentDeck.DeckDict
         self.DeckList = CurrentDeck.DeckList
         self.CardList = CurrentDeck.CardList
         self.Features = CurrentDeck.Features
         self.DeckName = CurrentDeck.DeckName
+
+        # Stores the ML current deck model attribute
         self.ModelML = CurrentDeckMLModel.ModelML
+
+        # Stores the Utility attributes
         self.DPI_SHOW_HAND = CurrentResolution.DPI_SHOW_HAND
         self.DPI_DISPLAY_PREDICTION = CurrentResolution.DPI_DISPLAY_PREDICTION
         self.FIG_SIZE = CurrentResolution.FIG_SIZE
 
 
-    def _CardsToIndex(self,DeckList):
-        DeckListNumbers = []
+    def _CardsToIndex(self,
+                      DeckList: list,
+                      ) -> list:
+        """
+        _CardsToIndex function returns a list of all the cards numbers (int) of the deck containing all the cards including duplicates cards.
+        It creates the list of integers DeckListNumbers corresponding to DeckList.
+
+        The goal of this function is later on to be able to shuffle the list using the np.random funtion which only works on numbers.
+
+        Parameters
+        ----------
+        DeckList
+            list of all the cards (str) of the deck containing all the cards including duplicates cards.
+        """
+        DeckListNumbers: list = []
         for Card in DeckList:
             DeckListNumbers.append(self.CardList.index(Card))
         return DeckListNumbers
 
-    def _CreateHand(self,DeckList,n):
+    def _CreateHand(self,
+                    DeckList: list,
+                    n: int
+                    ) -> list:
         """
-        Creates hand from the DeckList with n cards in it, which is a list of n strings containing the names of the card.
-        This kind of structure will be called HandNames from now on.
+        Creates a hand from the DeckList of cards with n cards in it, which is a list of n strings containing the names of the card.
+        This structure will be called HandNames later in the code.
+
+        Parameters
+        ----------
+        DeckList
+            list of all the cards (str) of the deck containing all the cards including duplicates cards.
+
         """
 
-        if n>len(DeckList):
+        if n > len(DeckList):
+            # TODO use the errors handling already inplemented in python
             print("Error, n > len(DeckList), ({0} > {2}) the function CreateHand cannot create a hand with {0} cards from a DeckList"
-            " only composed by the following cards {1}".format(n,DeckList,len(DeckList)))
+            " only composed by the following cards {1}".format(n, DeckList, len(DeckList)))
             return          
 
+        # To shuffle the list, the list must be composed of numbers, hence the _CardsToIndex function
         DeckListNumbers = Main._CardsToIndex(self,DeckList) 
+
+        # Here the list is shuffled
         DeckListNumbersShuffled = [i for i in DeckListNumbers]
         np.random.shuffle(DeckListNumbersShuffled)
+
+        # The hand is drawn from the beginning of the list 
         HandNumbers = DeckListNumbersShuffled[0:n]
         HandNames = [self.CardList[i] for i in HandNumbers]
+
         return HandNames 
 
-    def CreateHandFromDicts(self,DictList=[],nList=[NUMBERS_OF_CARDS_IN_HAND_NO_MULLIGAN]):
+    def CreateHandFromDicts(self,
+                            DictList: list = [],
+                            nList: list = [NUMBERS_OF_CARDS_IN_HAND_NO_MULLIGAN]
+                            ) -> list:
         """
-        - n represents the number of cards you want in your hand.
-        - DictList represents the list of python dictionnaries you want to create your hand with.
-        - nList represents the list of number of cards (integers) you want to pick from each dictionnary in DictList, respectively.
+        This function creates a hand composed by nlist[i] cards from the dictionary DictList[i] 
+        by creating several instances of the class Deck for each i
+
+        Parameters
+        ----------
+        
+        DictList
+            List of python dictionnaries you want to create your hand with.
+        nList
+            List of number of cards (integers) you want to pick from each dictionnary in DictList, respectively.
 
         """
 
@@ -131,7 +293,7 @@ class Main:
         len_DictList = len(DictList)
         len_nList = len(nList)
 
-        if len(self.DeckList) ==0:
+        if len(self.DeckList) == 0:
             print('Error, DeckList is empty, perhaps DeckDict has been forgotten in Main ?')
             return
         if len_DictList == 0:
@@ -143,26 +305,34 @@ class Main:
         if len_DictList !=  len_nList :
             print('Error, There is too much Dictionnaries in DictList or to much numbers in nList !')
             return
-        if np.sum(nList)!=NUMBERS_OF_CARDS_IN_HAND_NO_MULLIGAN:
+        if np.sum(nList) != NUMBERS_OF_CARDS_IN_HAND_NO_MULLIGAN:
             print('Error, The sum of nList is not equal to the numbers of cards without mulligan, which is 7 !')
             return
 
-        ListOfDeckLists = []
-        for k in range(len_nList):
-            Deck_k = Deck(self.DeckName,DictList[k])
-            ListOfDeckLists.append(Deck_k.DeckList)
+        ListOfDeckLists: list = []
+        for i in range(len_nList):
+            SubDeck_i = Deck(self.DeckName,DictList[i])
+            ListOfDeckLists.append(SubDeck_i.DeckList)
 
-        HandNames = []
-        for k in range(len_nList):
-            HandNames += Main._CreateHand(self,ListOfDeckLists[k],nList[k])
+        HandNames: list = []
+        for i in range(len_nList):
+            HandNames += Main._CreateHand(self,ListOfDeckLists[i],nList[i])
         return HandNames
 
 
-    def SortHand(self,HandNames):
+    def SortHand(self,
+                 HandNames: list
+                 ) -> list:
         """
-        Sorts a hand that is a list of str (the different cards in it),
+        This function sorts a hand that is a list of str (the different cards in it),
         according to the list defined in the features.csv file.
         It return an output which is the sorted list of str.
+
+        Parameter
+        ----------
+        
+        HandNames
+            list of str (the different cards in it)
         """
 
         HandToSortNumbers = [self.CardList.index(HandNames[i]) for i in range(len(HandNames))]
@@ -170,29 +340,65 @@ class Main:
         SortedHandNames = [self.CardList[i] for i in HandToSortNumbers]
         return (SortedHandNames)
 
-    def _ConvertCardIntoFeatures(self,Card):
+    def _ConvertCardIntoFeatures(self,
+                                 Card: str
+                                 ) -> np.array:
         """
-        Takes a card as an input and returns a 1D array corresponding to the features of the card.
+        This function takes a card that is a str as an input and 
+        returns a 1D-numpy array corresponding to the features of the card
+        according features.csv file.
+
+        Parameter
+        ----------
+        
+        Card
+            the str corresponding to the card.
         """
+
         CardIndex = self.CardList.index(Card)
         CardFeature = self.Features[CardIndex]
         return(CardFeature)
     
-    def _MakeTestableHand(self,HandNames):
+    def _MakeTestableHand(self,
+                          HandNames: list
+                          ) -> np.array:
+
         """
-        takes a hand that is a list of str (the different cards in it) as an input and returns a list of one numpy 1D-array representing 
-        the features of the Cards, making the output ready for the Scikit-Learn.predict() function
+        This function takes a hand that is a list of str (the different cards in it) as an input and 
+        returns a 2D-numpy array corresponding to the features of the cards concatenated 
+        according features.csv file.
+        Thus this function makes the output ready for the Scikit-Learn.predict() function.
+
+        Parameter
+        ----------
+        
+        HandNames
+            the list of str corresponding to the cards in the hand.
         """
         TestableHand = []
         for i in range(len(HandNames)):
             Card_i = HandNames[i]
             CardFeature_i = Main._ConvertCardIntoFeatures(self,Card_i)
             TestableHand = np.concatenate((TestableHand,CardFeature_i))
-        TestableHand = [TestableHand]
+        TestableHand = [TestableHand] # in order to have a 2D array to run the algorithm
         return(TestableHand)
 
-    def ShowHand(self,HandNames):
-        ImagesList =[]
+    def ShowHand(self,
+                 HandNames: list
+                 ) -> None:
+
+        """
+        This function takes a list of str as input and 
+        displays the images corresponding to the sorted cards in hand.
+        TODO Clean the function
+
+        Parameter
+        ----------
+        
+        HandNames
+            the list of str corresponding to the cards in the hand.        
+        """
+        ImagesList = []
         for Card in HandNames:
             ImagesList.append(self.DeckName+'/Pictures_'+self.DeckName+'/'+Card+'.jpg')
         Images = [ Image.open(i) for i in ImagesList ]
@@ -201,7 +407,20 @@ class Main:
         Utility._DisplayImage(self,ImagesCombined,self.FIG_SIZE,self.DPI_SHOW_HAND)
         
 
-    def _displayPrediction(self,prediction):
+    def _displayPrediction(self,
+                           prediction: int
+                           ) -> None :
+        """
+        This function takes a prediction (int) as an input and 
+        displays the corresponding image (Keep or Mulligan)
+
+        Parameter
+        ----------
+        
+        prediction
+            the int corresponding to the result of the algorithm       
+        """
+
         if prediction == 1:
             Img =  Image.open('General/Pictures/Keep.PNG')
             Utility._DisplayImage(self,Img,self.FIG_SIZE,self.DPI_DISPLAY_PREDICTION)
@@ -210,22 +429,62 @@ class Main:
             Img =  Image.open('General/Pictures/Mulligan.PNG')
             Utility._DisplayImage(self,Img,self.FIG_SIZE,self.DPI_DISPLAY_PREDICTION)
 
-    def TestHand(self,HandNames): 
+    def TestHand(self,
+                 HandNames: list
+                 ) -> int: 
+        """
+        This function takes a HandNames (list of str) as an input and 
+        returns the corresponding prediction using the algorithm (0 or 1)
+
+        Parameter
+        ----------
+        
+        HandNames
+            the list of str corresponding to the cards in the hand.   
+        """
+
         TestableHand = Main._MakeTestableHand(self,HandNames)
         prediction = self.ModelML.predict(TestableHand)[PREDICTION_INDEX]
         Main._displayPrediction(self,prediction)
         return prediction
 
-    def RunHand(self,Hand):
+    def RunHand(self,
+                Hand: str
+                ) -> None:
+
         """
-        takes a unique string as input which is the concatenation of all cards contained in the Hand
+        This function takes a Hand (str with spaces between the card names) as an input and 
+        displays the hand with corresponding image (Keep or Mulligan)
+
+        Parameter
+        ----------
+        
+        HandNames
+            str of the concatenation of all cards contained in the Hand with spaces between names
         """
         HandNames = Hand.split()
         SortedHandNames = Main.SortHand(self,HandNames)
         Main.ShowHand(self,SortedHandNames)
         Main.TestHand(self,SortedHandNames)
 
-    def TestModel(self,n,DictList=[],nList=[NUMBERS_OF_CARDS_IN_HAND_NO_MULLIGAN]):
+    def TestModel(self,
+                  n: int,
+                  DictList: list = [],
+                  nList: list = [NUMBERS_OF_CARDS_IN_HAND_NO_MULLIGAN]
+                  ) -> None:
+        """
+        This function tests the current algorithm on n hands generated using nList[i] (int) cards from the DictList[i] (dict)
+
+        Parameters
+        ----------
+        
+        n
+            number of hands to be tested
+        DictList
+            list of dictionnaries that will generate the hands
+        nList
+            list of integers that will represent the number of cards drawn from each dictionnary    
+        """
         for _ in range(n):  
             HandNames = Main.CreateHandFromDicts(self,DictList=DictList,nList=nList)
             Hand = ' '.join(HandNames)
@@ -233,7 +492,25 @@ class Main:
 
 class Train:
 
-    def __init__(self,DeckName,DeckDict,Resolution ='high'):
+    def __init__(self,
+                 DeckName: str,
+                 DeckDict: dict = {str : int},
+                 Resolution: str ='high'
+                 ) -> None:
+
+        """
+        Initialisation of the class Train 
+
+        Parameters
+        ----------
+        DeckName
+            The name of the deck
+        DeckDict
+            The dictionary corresponding to the cards inside the deck and their number.
+            The keys of the dictionnary are the cards written as str, and the corresponding values are their number.
+        Resolution
+            str that represent the quality of the images printed by the function. The str must be equal to 'low' or to 'high'. 
+        """
 
         CurrentDeck = Deck(DeckName,DeckDict)
         CurrentResolution = Utility()
@@ -250,7 +527,19 @@ class Train:
         self.DPI_DISPLAY_PREDICTION = CurrentResolution.DPI_DISPLAY_PREDICTION
         self.FIG_SIZE = CurrentResolution.FIG_SIZE
 
-    def MyScore(self,TestingFileInput='TestingSet'):
+    def MyScore(self,
+                TestingFileInput: str ='TestingSet'
+                ) -> list:
+        """
+        This function tests the current algorithm on the test set testingFileInput 
+        and returns the failed hands.
+
+        Parameters
+        ----------
+        TestingFileInput
+            The str that designs the test data file
+        """
+
         CurrentDeckMLModel = ML(self.DeckName)
         CurrentDeckMLModel.LoadModel()
         self.ModelML = CurrentDeckMLModel.ModelML
@@ -271,7 +560,27 @@ class Train:
         return FailedHands
                 
 
-    def MakeTrainingSet(self,n,TrainingSetSize,TrainingFileName):
+    def MakeTrainingSet(self,
+                        n: int,
+                        TrainingSetSize: int,
+                        TrainingFileName: str
+                        ) -> None:
+        """
+        This function helps the user creating the data sets by creating 
+        TrainingSetSize data points (hands) and then writes them to the file TrainingFileName
+
+        Inputing 9 breaks the loop and finishes the function
+
+        Parameters
+        ----------
+        n   
+            number of cards in the hands generated.
+        TrainingSetSize
+            number of hands generated.
+        TrainingFileName
+            The str that designs the training data file that will be used to write the hands
+        """
+
         pv =';'
         with open(self.DeckName+'/Training_set_'+self.DeckName+'/'+TrainingFileName+'.csv' , 'a+') as TrainingFile,\
         open(self.DeckName+'/Training_set_'+self.DeckName+'/'+TrainingFileName+'Question.csv' , 'a+') as QuestionFile:
@@ -293,7 +602,28 @@ class Train:
                     break 
         print('Written !')
 
-    def MakeTrainingSetWithModel(self,n,TrainingSetSize,TrainingFileName):
+    def MakeTrainingSetWithModel(self,
+                                 n: int,
+                                 TrainingSetSize: int,
+                                 TrainingFileName: str
+                                 ) -> None:
+        """
+        This function helps the user creating the data sets by creating 
+        TrainingSetSize data points (hands) and then writes them to the file TrainingFileName.
+        Contrarely with the MakeTrainingSet function, this function uses the algorithm itself to 
+        assess the hands and asks the user if the algorithm correctly classified the hands. 
+
+        Inputing 9 breaks the loop and finishes the function
+
+        Parameters
+        ----------
+        n   
+            number of cards in the hands generated.
+        TrainingSetSize
+            number of hands generated.
+        TrainingFileName
+            The str that designs the training data file that will be used to write the hands
+        """                                 
         CurrentDeckMLModel = ML(self.DeckName)
         CurrentDeckMLModel.LoadModel()
         self.ModelML = CurrentDeckMLModel.ModelML
@@ -326,12 +656,35 @@ class Train:
         print('Written !')
 
 
-    def MakeControlledTrainingSetWithModel(self,n,DictList,nList,TrainingSetSize,TrainingFileName):
+    def MakeControlledTrainingSetWithModel(self,
+                                           n: int,
+                                           DictList: list,
+                                           nList: list,
+                                           TrainingSetSize: int,
+                                           TrainingFileName: str
+                                           ) -> None:
 
         """
-        - n represents the number of cards you want in your hand.
-        - DictList represents the list of python dictionnaries you want to create your hand with.
-        - nList represents the list of number of cards (integers) you want to pick from each dictionnary in DictList, respectively.
+        This function helps the user creating the data sets by creating 
+        TrainingSetSize data points (hands) and then writes them to the file TrainingFileName.
+        This function uses the algorithm itself to assess the hands and asks the user
+        if the algorithm correctly classified the hands. Moreover this function generates the hands 
+        according to the list of dictionnaries DictList and the list of ints nList
+
+        Inputing 9 breaks the loop and finishes the function
+
+        Parameters
+        ----------
+        n   
+            number of cards in the hands generated.
+        DictList 
+            represents the list of python dictionnaries you want to create your hand with.
+        nList 
+            represents the list of number of cards (integers) you want to pick from each dictionnary in DictList, respectively.
+        TrainingSetSize
+            number of hands generated.
+        TrainingFileName
+            The str that designs the training data file that will be used to write the hands
         """
 
         CurrentDeckMLModel = ML(self.DeckName)
@@ -367,19 +720,49 @@ class Train:
                     break 
         print('Written !')
 
-    def TrainingSetToDocs(self,TrainingFileName):
-        TrainingSet = Utility.read(self,self.DeckName+'/Training_set_'+self.DeckName+'/'+TrainingFileName+'.csv',header=None)
+    def _TrainingSetToDocs(self,
+                          TrainingFileInput: str
+                          ) -> (list,list):
+        """
+        This function generates the Docs and Labels to train the sklearn algorithm
+
+        Parameters
+        ----------
+
+        TrainingFileInput
+            The str that designs the training data file that will be read to generate the docs
+        """        
+
+
+        TrainingSet = Utility.read(self,self.DeckName+'/Training_set_'+self.DeckName+'/'+TrainingFileInput+'.csv',header=None)
         Docs = []
         for Line in TrainingSet:
             Line = Line[0:NUMBERS_OF_CARDS_IN_HAND_NO_MULLIGAN]
             Docs.append(" ".join(Line))
-        Labels = TrainingSet[:,NUMBERS_OF_CARDS_IN_HAND_NO_MULLIGAN]           
-        return(Docs,Labels)
+        Labels = TrainingSet[:,NUMBERS_OF_CARDS_IN_HAND_NO_MULLIGAN]   
+        return (Docs,Labels)
 
 
-    def WriteTrainingSetFeatureFromDocs(self,Docs,Labels,TrainingFileName):
+    def _WriteTrainingSetFeatureFromDocs(self,
+                                        Docs: list,
+                                        Labels: list,
+                                        TrainingFileOutput: str
+                                        ) -> None:
+        """
+        This function writes the TrainingFileOutput.csv file using the features of the cards concatenated into the hands
+        (Docs) and the labels of those hands (Labels)
+
+        Parameters
+        ----------
+        Docs
+            list of all the hands (as features with numbers) needed to be written in the file
+        Labels
+            list of all the labels corresponding to the hands needed to be written in the file
+        TrainingFileOutput
+            The str that designs the training data file that will be written
+        """                                         
         pv =';'
-        with open(self.DeckName+'/Training_set_'+self.DeckName+'/'+TrainingFileName+'.csv' , 'w') as TrainingFile:
+        with open(self.DeckName+'/Training_set_'+self.DeckName+'/'+TrainingFileOutput+'.csv' , 'w') as TrainingFile:
             for i in range(len(Docs)):
                 Docs_i = Main.SortHand(self,Docs[i].split())
                 LineWritten=''
@@ -392,11 +775,45 @@ class Train:
                 TrainingFile.write(LineWritten+'\n')
         print('Written !')
 
-    def TransformTrainingSet(self,TrainingFileInput,TrainingFileOutput= 'TrainingSet'):
-        Docs,Labels = Train.TrainingSetToDocs(self,TrainingFileInput)
-        Train.WriteTrainingSetFeatureFromDocs(self,Docs,Labels,TrainingFileOutput)
+    def TransformTrainingSet(self,
+                             TrainingFileInput: str,
+                             TrainingFileOutput: str= 'TrainingSet'
+                             ) -> None:
+        """
+        This function writes the TrainingFileOutput.csv file (with numbers instead of str) 
+        using the features of the cards concatenated into the hands contained the 
+        TrainingFileInput file
 
-    def TrainAndSaveWeights(self,Nestimators=100,MaxDepth=None,save=True):
+        Parameters
+        ----------
+        TrainingFileInput
+            The str that designs the training data file that will be read to generate the docs
+        TrainingFileOutput
+            The str that designs the training data file that will be written
+        """         
+
+        Docs,Labels = Train._TrainingSetToDocs(self,TrainingFileInput)
+        Train._WriteTrainingSetFeatureFromDocs(self,Docs,Labels,TrainingFileOutput)
+
+    def TrainAndSaveWeights(self,
+                            Nestimators: int = 100,
+                            MaxDepth: int = None,
+                            save: bool = True
+                            ) -> None:
+                            
+        """
+        This function trains the random forest classifier and saves the weights of the classifier
+
+        Parameters
+        ----------
+        Nestimators
+            integer that designs the number of trees used for the algorithm
+        MaxDepth
+            The maximum depth of each tree. 
+        save
+            boolean variable to save or not the weights.
+        """    
+
         Data = Utility.read(self,self.DeckName+'/Training_set_'+self.DeckName+'/TrainingSet.csv',header = None)
         X, y = Data[:,:-1],Data[:,-1]
         N_examples = X.shape[0]
@@ -410,7 +827,37 @@ class Train:
         if save:
             joblib.dump(MLModel,self.DeckName+'/Training_set_'+self.DeckName+'/'+self.DeckName+'SavedWeights.pkl')
     
-    def FindBestNestimator(self,X_train,y_train,X_test,y_test,MaxDepth,N0=30,NestimatorsList=[]):
+    def FindBestNestimator(self,
+                           X_train: np.array,
+                           y_train: np.array,
+                           X_test: np.array,
+                           y_test: np.array,
+                           MaxDepth: int,
+                           N0: int = 30,
+                           NestimatorsList: list = []
+                           ) -> (int,list,list,list):
+        """
+        This function finds the best value for Nestimator according to the test score and returns the best value for Nestimator.
+        Moreover it returns the lists of the values of Nestimator used for the calibration, as well as the corresponding lists of 
+        Score (testing score) and fit (training score). The values used for Nestimator are incremented by 5 in the loop.
+
+        Parameters
+        ----------
+        X_train
+            X data used for training, 2D np.array
+        y_train
+            y data (labels) used for training, 2D np.array
+        X_test
+            X data used for testing, 2D np.array
+        y_test
+            y data (labels) used for testing, 2D np.array
+        MaxDepth
+            The maximum depth of each tree.
+        N0
+            minimum value for Nestimator used if the NestimatorsList is not inputed.
+        NestimatorsList
+            list of the Nestimators values to be tested
+        """                              
         increment = 5
         InitialNestimator = N0
         FinalNestimator = 300
@@ -442,7 +889,35 @@ class Train:
         return BestNestimator, ListNestimator, ListScore , ListFit
 
 
-    def TrainAndTest(self,Nestimators=100,FindBestNestimators=True,NestimatorsList = [],TestSize=0,MaxDepth=None,TestingFileInput=''):
+    def TrainAndTest(self,
+                     Nestimators: int = 100,
+                     FindBestNestimators: bool = True,
+                     NestimatorsList: list = [],
+                     TestSize: float = 0,
+                     MaxDepth: int = None,
+                     TestingFileInput: str = ''
+                     ) -> (list,list,list):
+        """
+        This function trains the algorithm while searching for the best value of Nestimator if FindBestNestimators is true.
+        Moreover it returns the lists of the values of Nestimator used for the calibration, as well as the corresponding lists of 
+        Score (testing score) and fit (training score).
+
+        Parameters
+        ----------
+        Nestimators
+            number of trees used for the random forest classifier
+        FindBestNestimators
+            finds the best value for Nestimator if True
+        NestimatorsList
+            list of the Nestimators values to be tested
+        TestSize
+            the separation between train and test data (0.2 corresponds to 20% of test data and 80% of training data) 
+        MaxDepth
+            The maximum depth of each tree.
+        TestingFileInput
+            The testing file if selected
+        """
+
         Data = Utility.read(self,self.DeckName+'/Training_set_'+self.DeckName+'/TrainingSet.csv',header = None)
         X, y = Data[:,:-1],Data[:,-1]
         print("N_examples : ",X.shape[0])
@@ -469,7 +944,21 @@ class Train:
 
 class Analyse:
 
-    def __init__(self,DeckName,DeckDict={}):
+    def __init__(self,
+                 DeckName: str,
+                 DeckDict: dict = {str : int}
+                 ) -> None:
+        """
+        Initialisation of the class Analyse 
+
+        Parameters
+        ----------
+        DeckName
+            The name of the deck, it must be the same than for the class deck in order to load the correct model
+        DeckDict
+            The dictionary corresponding to the cards inside the deck and their number.
+            The keys of the dictionnary are the cards written as str, and the corresponding values are their number.
+        """    
 
         CurrentDeck = Deck(DeckName,DeckDict)
         CurrentDeckMLModel = ML(DeckName)
@@ -483,9 +972,15 @@ class Analyse:
         self.DeckName = CurrentDeck.DeckName
         self.ModelML = CurrentDeckMLModel.ModelML
 
-    def AnalysePattern(self):
+    def AnalysePattern(self
+                       ) -> None :
+
+        """
+        This function analyses the results of the algorithm and the 10 features that are the most important.
+        """
+                       
         self.ImportanceFeature = list(self.ModelML.feature_importances_)
-        ImportanceFeatureSorted = list(self.ModelML.feature_importances_)
+        ImportanceFeatureSorted = self.ImportanceFeature
         ImportanceFeatureSorted.sort(reverse=True)
 
         NumberOfFeaturesPerCardIndex = 1
@@ -515,8 +1010,29 @@ class Analyse:
             if count > 10 :
                 break
 
-    def PlotGraphs(self,MaxDepthList,TestSizeList,NestimatorsList, Nexperiments = 50):
-        
+    def PlotGraphs(self,
+                   MaxDepthList: list,
+                   TestSizeList: list,
+                   NestimatorsList: list,
+                   Nexperiments: int = 50
+                   ) -> None:
+
+        """
+        This function plots the graphs of the test score against the max depth (fixed Nestimator) and against the value Nestimator
+        (fixed max depth)
+
+        Parameters
+        ----------
+        MaxDepthList
+            list of the different Max Depth values to be tested
+        TestSizeList
+            list of the different values of the testSize separation to be tested
+        NestimatorsList
+            list of the Nestimators values to be tested
+        Nexperiments
+            number of experiements
+        """
+
         Results_testing = np.zeros((Nexperiments,len(MaxDepthList),len(NestimatorsList)))
         Results_training = np.zeros((Nexperiments,len(MaxDepthList),len(NestimatorsList)))
         for _,TestSize in enumerate(TestSizeList):
